@@ -6,5 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
   </head>
-  <body></body>
+  <body>
+    <!-- HTMLで表示部分 -->
+    <div id="timer">00:00</div>
+
+    <!-- JavaScriptで動き -->
+    <script>
+      let seconds = 60;
+      setInterval(() => {
+        document.getElementById("timer").textContent = `00:${seconds--}`;
+      }, 1000);
+    </script>
+  </body>
 </html>
