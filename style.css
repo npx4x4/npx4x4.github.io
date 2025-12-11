@@ -13,19 +13,13 @@ h1 {
 }
 
 a {
-    /* background-color: white;
-    border-left-style: solid;
-    border-left-width: 1%;
+    padding: auto;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
 
-
-
-
-
-
-
-
-
-
-    
-    border-left-color: black; */
+    background-color: green;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
