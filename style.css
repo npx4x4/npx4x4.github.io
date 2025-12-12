@@ -119,9 +119,13 @@ hr {
     color: black;
     font-weight: bold;
     position: absolute;
-    top: 100px;
-    right: 140px;
-    animation: hurueru .2s  infinite;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin-top: 100px;
+    margin-left: 280px;
+    animation: hurueru .1500ms  infinite;
 }
 
 @keyframes hurueru {
@@ -138,4 +142,39 @@ footer {
     padding: 10px;
     text-align: center;
 
+}
+
+.back_home {
+    position: absolute;
+    left: 0;
+    background-color: white;
+    color: green;
+    border: medium solid green;
+    border-radius: 0 30px 30px 0;
+    margin-top: 25px;
+
+    text-decoration: none;
+    font-weight: 900;
+    padding: 10px 10px 10px 60px;
+}
+
+.back_home:hover {
+    background-color: green;
+    color: white;
+}
+.back_home:hover .back_home_img {
+    filter: brightness(0) invert(100%);
+}
+
+.back_home_img {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    top: -12px;
+    left: -2px;
+}
+
+.tool_head {
+    position: relative;
+    width: 100%;
 }
