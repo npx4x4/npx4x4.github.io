@@ -6,6 +6,9 @@ body {
     font-optical-sizing: auto;
     font-weight: 100;
     font-style: normal;
+
+    display: flex;
+    flex-direction: column;
 }
 
 /* a {
@@ -29,7 +32,7 @@ body {
     background-color: white;
     color: black;
 
-    margin: 70px 100px 100px 100px;
+    margin: 70px 100px 50px 100px;
     display: flex;
     align-items: center;
 }
@@ -56,7 +59,12 @@ body {
     width: 60px;
     height: 60px;
 
-    margin-right: 10px;
+    margin-left: 10px;
+    margin-right: 12px;
+}
+
+hr {
+    margin: 0px 80px 0px 80px;
 }
 
 .gake {
@@ -65,4 +73,69 @@ body {
     left: -100px;
     width: 200px;
     height: 200px;
+}
+
+.tool_box {
+    margin: 50px 60px 50px 60px;
+    display: flex;
+    justify-content: space-between;
+
+    background-color: white;
+}
+
+.tool_link {
+    text-align: center;
+    background-color: green;
+    color: white;
+    flex: 1;
+    padding: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    border-radius: 10px;
+    
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.tool_link:hover {
+    background-color: mediumseagreen;
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+    -webkit-transition: all 0.2s;
+    transition: all 0.2s;
+}
+
+.kojing_box {
+    position: relative;
+}
+
+.kojing {
+    width: 300px;
+    height: 300px;
+    margin: auto;
+}
+
+.kojing_message {
+    color: black;
+    font-weight: bold;
+    position: absolute;
+    top: 100px;
+    right: 140px;
+    animation: hurueru .2s  infinite;
+}
+
+@keyframes hurueru {
+    0% {transform: translate(0px, 0px) rotateZ(0deg)}
+    25% {transform: translate(2px, 2px) rotateZ(1deg)}
+    50% {transform: translate(0px, 2px) rotateZ(0deg)}
+    75% {transform: translate(2px, 0px) rotateZ(-1deg)}
+    100% {transform: translate(0px, 0px) rotateZ(0deg)}
+}
+
+footer {
+    margin-top: auto;
+    background-color: whitesmoke;
+    padding: 10px;
+    text-align: center;
+
 }
