@@ -21,12 +21,21 @@
     </div>
     <div class="oclock_timer_box">
       <form>
+
         <div>
           <label for="target-time">目標時刻を入力</label>
-          <input type="time" id="target-time" name="target_time required">
+          <input type="time" id="target-time" name="target_time" required>
+          <button type="start">開始</button>
         </div>
-          <button type="submit">開始</button>
+        <p></p>
       </form>
     </div>
   </body>
+  <script>
+    function timerStart() {
+      let targetTime = document.getElementById('target-time')
+    }
+    let startButton = document.getElementById('start');
+    startButton.onclick = timerStart;
+  </script>
 </html>
