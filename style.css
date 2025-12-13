@@ -151,7 +151,7 @@ footer {
     color: green;
     border: medium solid green;
     border-radius: 0 30px 30px 0;
-    margin-top: 25px;
+    margin-top: 20px;
 
     text-decoration: none;
     font-weight: 900;
@@ -177,4 +177,17 @@ footer {
 .tool_head {
     position: relative;
     width: 100%;
+    margin-bottom: 100px;
+}
+
+.tool_title {
+    position: absolute;
+    right: 0;
+    left: 0;
+    top: 60px;
+}
+
+.oclock_timer_box {
+    font-weight: bold;
+    margin-top: 40px;
 }
