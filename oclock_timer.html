@@ -20,22 +20,47 @@
       <h1 class="tool_title">時刻指定タイマー</h1>
     </div>
     <div class="oclock_timer_box">
+      <div id="bar" class></div>
+      <div id="time" class></div>
+    </div>
       <form>
-
-        <div>
+        <div class="oclock_in">
           <label for="target-time">目標時刻を入力</label>
           <input type="time" id="target-time" name="target_time" required>
           <button type="start">開始</button>
         </div>
-        <p></p>
       </form>
-    </div>
   </body>
   <script>
-    function timerStart() {
-      let targetTime = document.getElementById('target-time')
+    // タイマーIDを保持
+    // カウントストップ時やスタートボタンが押された際現タイマー処理を止めるのに利用
+    let timerId = null;  
+    
+    function timer() {
+      // 設定時刻を取得, なければ離脱
+      const input = document.getElementById('target-time').value;
+      if(!input) return;
+
+      // 入力をバラす
+      const [h, m] = input.split(':').map(Number);
+      const now = new Date();
+      // ここで日時を含めて目標時刻を確定させる
+      const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+      const text = document.getElementById('time');
+
+      timerID => setInterval(() => {
+          const now = new Date();
+          const diff = Math.floor((target)-now) / 1000;
+
+          if(diff <= 0) {
+            text.textContent = 'Finish!';
+            clearInterval(timerID);
+            timerID = null;
+            return;
+          }
+      }, 1000)
     }
-    let startButton = document.getElementById('start');
-    startButton.onclick = timerStart;
+
+    document.getElementById('start').onclick = timer;
   </script>
 </html>

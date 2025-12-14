@@ -188,6 +188,27 @@ footer {
 }
 
 .oclock_timer_box {
-    font-weight: bold;
-    margin-top: 40px;
+    position: relative;
+    border: medium solid black;
+    border-radius: 20px;
+    margin: 100px auto 200px auto;
+    width: 420px;
+    height: 80px;
+}
+
+#bar {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: 0px;
+    height: 60px;
+    background-color: green;
+    color: green;
+    transition: width ls ease;
+    border-radius: 10px;
+}
+
+.oclock_in {
+    margin-top: 100px;
+    font-weight: bolder;
 }
