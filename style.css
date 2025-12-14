@@ -209,7 +209,7 @@ footer {
 }
 
 #time {
-    position: absolute;
+    position: relative;
     top: 100px;
     right: 0;
     left: 0;
