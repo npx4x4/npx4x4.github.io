@@ -74,7 +74,7 @@
           const min = ('00' + Math.floor(diff%3600 / 60)).slice(-2);
           const sec = ('00' + diff%60).slice(-2);
           text.textContent = `${hour}:${min}.${sec}`;
-          bar.style.width = diff / total * 100 + '%';
+          bar.style.width = diff / max * 400 + 'px';
       }, 1000)
     }
 
