@@ -20,13 +20,18 @@
       <h1 class="tool_title">文字数カウンター</h1>
     </div>
     <div class="tc_box">
-        <input class="text_box" type="text" id="text" required>
+        <img class="counter_man" src="img/counter.png">
+        <p id="count"></p>
+        <textarea class="text_box" id="in_text" cols="60" rows="20"></textarea>
     </div>
-    
-    
     
   </body>
   <script>
-    
+
+    setInterval(() => {
+        let st = document.getElementById('in_text');
+        document.getElementById('count').textContent = `${st.value.length}` + "文字";
+    }, 500)
+
   </script>
 </html>
