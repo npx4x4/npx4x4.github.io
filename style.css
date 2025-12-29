@@ -240,6 +240,12 @@ footer {
     width: 80%;
     font-size: 2.3vw;
 }
+/* スマホだけに適用させたい */
+@media (max-width: 600px) {
+    .text_box {
+        font-size: 4vw;
+    }
+}
 
 .counter_man {
     position: absolute;
