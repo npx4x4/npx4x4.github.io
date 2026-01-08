@@ -1,0 +1,24 @@
+{
+  "name": "npx4x4_screen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://npx4x4: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@github.com/npx4x4/npx4x4.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/npx4x4/npx4x4.github.io/issues"
+  },
+  "homepage": "https://github.com/npx4x4/npx4x4.github.io#readme",
+  "dependencies": {
+    "typescript": "^5.9.3"
+  }
+}
