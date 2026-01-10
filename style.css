@@ -264,3 +264,8 @@ footer {
     font-weight: 400;
     font-size: 30px;
 }
+
+.rs_menu {
+    display: grid; /*グリッドレイアウト化*/
+    padding: 10%;
+}
