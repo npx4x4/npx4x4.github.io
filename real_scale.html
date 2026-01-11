@@ -23,15 +23,18 @@
     </div>
 
     <form class="rs_menu_box" id="rs_menu">
-      <p name="rs_menu">デバイスの解像度: ----px x ----px</p>
-      <select name="rs_menu">
+      <p id="show_resolution">デバイスの解像度: ----px x ----px</p>
+      <label for="screen_diagonal">デバイスの画面サイズ(インチ)を入力</label>
+      <input name="screen_diagonal" type="number" step="0.1">
+      <input name=""
+      <label for="anchor"></label>
+      <select name="anchor">
         <option value="top_left">左上</option>
         <option value="top_right">右上</option>
         <option value="top_left">中央</option>
         <option value="top_left">左下</option>
         <option value="top_left">右下</option>
       </select>
-      <input name="rs_menu" type="number" step="0.1">
       <button name="rs_menu">シミュレート</button>
     </form>
     
