@@ -18,7 +18,11 @@
     "url": "https://github.com/npx4x4/npx4x4.github.io/issues"
   },
   "homepage": "https://github.com/npx4x4/npx4x4.github.io#readme",
-  "dependencies": {
-    "typescript": "^5.9.3"
+  "devDependencies": {
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
   }
 }

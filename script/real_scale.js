@@ -1,1 +1,10 @@
+export {};
 console.log("Hello World");
+// 画面サイズ(画素数を取得)
+let scr_w = screen.width;
+let scr_h = screen.height;
+//html要素を取得
+const showResolution = document.getElementById('show_resolution');
+const setButton = document.getElementById('');
+showResolution.textContent = "デバイスの解像度: " + String(scr_w) + "x" + String(scr_h);
+//# sourceMappingURL=real_scale.js.map

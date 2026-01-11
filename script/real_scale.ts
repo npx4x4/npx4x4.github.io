@@ -9,6 +9,6 @@ let scr_h: number = screen.height;
 const showResolution = document.getElementById('show_resolution') as HTMLElement;
 const setButton = document.getElementById('')
 
-showResolution.innerText = "デバイスの解像度: " + String(scr_w) + "x" + String(scr_h);
+showResolution.textContent = "デバイスの解像度: " + String(scr_w) + "x" + String(scr_h);
 
 
