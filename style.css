@@ -268,7 +268,7 @@ footer {
 .rs_menu_box {
     border: medium solid #1C8C42;
     border-radius: 20px;
-    width: 400px;
+    width: 440px;
     margin-left: auto;
     margin-right: auto;
     display: grid; /*グリッドレイアウト化*/
@@ -281,13 +281,24 @@ footer {
         "areaF areaF";
     column-gap: 5%;
     row-gap: 5%;
-    padding: 6%;
+    padding: 2% 6% 6% 6%;
 }
 
 #show_resolution {
     grid-area: areaA;
 }
 
-button[name="rs_set"]  #caution{
-    grid-template-areas: areaF;
+#rs_set {
+    grid-area: areaF;
+    /* text-align: center; */
+}
+
+#sim_ground {
+    /* 画面上に固定 */
+    position: fixed;
+    /* 画面いっぱい覆う */
+    width: 100vw;
+    height: 100vh;
+
+    background-color: white;
 }

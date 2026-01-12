@@ -32,10 +32,20 @@
         <option value="top_left">左下</option>
         <option value="top_left">右下</option>
       </select>
-      <p id="caution">全画面になります</p>
-      <button type="submit" name="rs_set">シミュレート開始</button>
+      <!-- <p id="caution" style="color: red;">※全画面になります※</p> -->
+      <!-- submitにするとリロード入るので一旦button -->
+      <button type="button" id="rs_set">シミュレート開始</button>
     </form>
+    <br>
+    <h3>- シミュレート開始後の使い方 -</h3>
+    <p>
+      ・PCブラウザのみ想定しています。<br>
+      ・マウスをクリックすることでメニューが開きます。<br>
+      ・[F11]を押して全画面モードにすることを推奨します。<br>
+      ・全画面モードの終了は再度[F11]を押ししてください。
+    </p>
     
+    <div id="sim_ground"></div>
     
   </body>
   <!-- ts->js変換があるからそのまま -->
