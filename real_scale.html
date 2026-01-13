@@ -24,28 +24,18 @@
       <p id="show_resolution">デバイスの解像度: ----px x ----px</p>
       <label for="screen_diagonal">デバイスの画面サイズを入力</label>
       <input name="screen_diagonal" type="number" value="14" placeholder="インチで入力" step="0.1" required>
-      <label for="anchor">シミュレート表示の基準位置を選択</label>
-      <select name="anchor">
-        <option value="top_left">左上</option>
-        <option value="top_right">右上</option>
-        <option value="top_left">中央</option>
-        <option value="top_left">左下</option>
-        <option value="top_left">右下</option>
-      </select>
-      <p style="grid-area: areaF;">シミュレートで表示する画面の設定</p>
+      <p style="grid-area: areaD;">シミュレートで表示する画面の設定</p>
       <!-- <label for="sim_screen_type">シミュレートとする画面タイプ</label>
       <input name="sim_screen_type" type="radio"> -->
         <!-- <option value="" -->
       <label for="sim_screen_diagonal">画面サイズを入力</label>
-      <input name="sim_screen_diagonal" type="number" value="5" placeholder="インチで入力" step="0.1" required>
-      <label for="aspect">画面のアスペクト(縦横)比を選択</label>
-      <select name="aspect">
-        <option value="4:3">4:3</option>
-        <option value="3:2">3:2</option>
-        <option value="16:9">16:9</option>
-        <option value="21:9">21:9</option>
-        <option value="32:9">32:9</option>
-      </select>
+      <input name="sim_screen_diagonal" type="number" value="5" placeholder="インチで入力" step="0.01" required>
+      <label for="aspect_w">画面のアスペクト(横縦)比を入力</label>
+      <div class="aspect_wrapper">
+        <input name="aspect_w" type="number" value="16" placeholder="横" step="0.01" required>
+        <span style="font-weight: 600;">:</span>
+        <input name="aspect_h" type="number" value="9" placeholder="縦" step="0.01" required>
+      </div>
       <!-- <p id="caution" style="color: red;">※全画面になります※</p> -->
       <!-- submitにするとリロード入るので一旦button -->
       <button type="button" id="rs_set">シミュレート開始</button>

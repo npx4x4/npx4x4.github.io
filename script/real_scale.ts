@@ -25,7 +25,7 @@ function getPixelSize(diagonal: number) {
     return diagonal*mm / Math.sqrt(scrWidth**2 + scrHeight**2);
 }
 
-function drawSimShape(diagonal: number, aspect: string) {
+function drawSimShape(diagonal: number, aspect: string, pixelSize: number) {
     let w: number = 0;
     let h: number = 0;
     switch(aspect) {
@@ -41,8 +41,8 @@ function drawSimShape(diagonal: number, aspect: string) {
             w=32; h=9; break;
     }
 
-    let shapeWidth = diagonal*mm / Math.sqrt(w**2 + h**2) * w;
-    let shapeHeight = diagonal*mm / Math.sqrt(w**2 + h**2) * h;
+    let shapeWidth = diagonal*mm / Math.sqrt(w**2 + h**2) * w / pixelSize;
+    let shapeHeight = diagonal*mm / Math.sqrt(w**2 + h**2) * h / pixelSize;
     simShape.style.width = shapeWidth + "px";
     simShape.style.height = shapeHeight + "px";
 }
@@ -58,7 +58,7 @@ function rs_start() {
     let simScrDiagonalVal = simScrDiagonal.value;
     let aspect = rsMenuValue.aspect as HTMLSelectElement;
     let aspectVal = aspect.value; 
-    drawSimShape(Number(simScrDiagonalVal), aspectVal)
+    drawSimShape(Number(simScrDiagonalVal), aspectVal, pixelSize)
     console.log(pixelSize);
 
 }
