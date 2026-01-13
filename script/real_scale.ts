@@ -25,22 +25,7 @@ function getPixelSize(diagonal: number) {
     return diagonal*mm / Math.sqrt(scrWidth**2 + scrHeight**2);
 }
 
-function drawSimShape(diagonal: number, aspect: string, pixelSize: number) {
-    let w: number = 0;
-    let h: number = 0;
-    switch(aspect) {
-        case "4:3":
-            w=4; h=3; break;
-        case "3:2":
-            w=3; h=2; break;
-        case "16:9":
-            w=16; h=9; break;
-        case "21:9":
-            w=21; h=9; break;
-        case "32:9":
-            w=32; h=9; break;
-    }
-
+function drawSimShape(diagonal: number, w: number, h: number, pixelSize: number) {
     let shapeWidth = diagonal*mm / Math.sqrt(w**2 + h**2) * w / pixelSize;
     let shapeHeight = diagonal*mm / Math.sqrt(w**2 + h**2) * h / pixelSize;
     simShape.style.width = shapeWidth + "px";
@@ -55,10 +40,12 @@ function rs_start() {
     let pixelSize= getPixelSize(Number(diagonalVal));
     
     let simScrDiagonal = rsMenuValue.sim_screen_diagonal as HTMLInputElement;
-    let simScrDiagonalVal = simScrDiagonal.value;
-    let aspect = rsMenuValue.aspect as HTMLSelectElement;
-    let aspectVal = aspect.value; 
-    drawSimShape(Number(simScrDiagonalVal), aspectVal, pixelSize)
+    let simScrDiagonalVal = Number(simScrDiagonal.value);
+    let aspectW= rsMenuValue.aspect_w as HTMLInputElement;
+    let aspectWVal = Number(aspectW.value); 
+    let aspectH= rsMenuValue.aspect_h as HTMLInputElement;
+    let aspectHVal = Number(aspectH.value); 
+    drawSimShape(simScrDiagonalVal, aspectWVal, aspectHVal, pixelSize)
     console.log(pixelSize);
 
 }
