@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>時刻指定タイマー</title>
+    <link rel="icon" href="img/favicon.ico">
+    <link href="style.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Trade+Winds&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div class="tool_head">
+      <a class="back_home" href="index.html">
+        <img class="back_home_img" src="img/esc.png">
+        ホームへ戻る
+      </a>
+      <h1 class="tool_title">時刻指定タイマー</h1>
+    </div>
+    <div class="oclock_timer_box">
+      <div id="bar"></div>
+      <div id="time">--:--.--</div>
+    </div>
+      <form>
+        <div class="oclock_in">
+          <label for="target-time">目標時刻を入力</label>
+          <input type="time" id="target-time" name="target_time" required>
+          <button type="button" id="start">開始</button>
+        </div>
+      </form>
+  </body>
+  <script>
+    // タイマーIDを保持
+    // カウントストップ時やスタートボタンが押された際現タイマー処理を止めるのに利用
+    let timerId = null;  
+    
+    function timer() {
+      if(timerId != null) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+
+
+      // 設定時刻を取得, なければ離脱
+      const input = document.getElementById('target-time').value;
+      if(!input) return;
+
+      // 入力をバラす
+      const [h, m] = input.split(':').map(Number);
+      const now = new Date();
+      // ここで日時を含めて目標時刻を確定させる
+      const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+      
+      const text = document.getElementById('time');
+      const bar = document.getElementById('bar');
+
+      const max = Math.floor((target-now) / 1000);
+      bar.style.width = '400px';
+
+      timerId = setInterval(() => {
+          const now = new Date();
+          const diff = Math.floor((target-now) / 1000);
+
+          if(diff <= 0) {
+            text.textContent = 'Finish!';
+            clearInterval(timerId);
+            timerId = null;
+            return;
+          }
+
+          const hour = ('00' + Math.floor(diff/3600)).slice(-2);
+          const min = ('00' + Math.floor(diff%3600 / 60)).slice(-2);
+          const sec = ('00' + diff%60).slice(-2);
+          text.textContent = `${hour}:${min}.${sec}`;
+          bar.style.width = diff / max * 400 + 'px';
+      }, 1000)
+    }
+
+    document.getElementById('start').onclick = timer;
+  </script>
+</html>
