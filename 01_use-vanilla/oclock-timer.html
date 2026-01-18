@@ -13,8 +13,8 @@
   </head>
   <body>
     <div class="tool_head">
-      <a class="back_home" href="index.html">
-        <img class="back_home_img" src="img/esc.png">
+      <a class="back_home" href="/">
+        <img class="back_home_img" src="/img/esc.png">
         ホームへ戻る
       </a>
       <h1 class="tool_title">時刻指定タイマー</h1>
@@ -65,6 +65,7 @@
 
           if(diff <= 0) {
             text.textContent = 'Finish!';
+            bar.style.width = diff / max * 400 + 'px';
             clearInterval(timerId);
             timerId = null;
             return;
