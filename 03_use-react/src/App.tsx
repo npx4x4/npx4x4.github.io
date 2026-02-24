@@ -3,9 +3,12 @@ import logo from './logo.svg';
 import './App.css';
 
 function App() {
+  const [rows, setRows] = React.useState(6);
+  const [cols, setCols] = React.useState(7);
+
   return (
     <div className="App">
-      <h1>Hello World!</h1>
+      <div class
     </div>
   );
 }
