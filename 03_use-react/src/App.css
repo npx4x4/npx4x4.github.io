@@ -93,3 +93,75 @@
     left: 0;
     top: 80px;
 }
+
+/* 名前リストエリア */
+.name-list-area {
+  padding: 20px 0;
+  border-top: 1px solid #ccc;
+  width: 100%;
+  background-color: #f9f9f9;
+}
+
+.name-list-area h2 {
+  margin-bottom: 10px;
+}
+
+.add-name {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.add-name-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.member-input {
+  margin-right: 0;
+}
+
+.member-file-label {
+  display: block;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+
+.member-file {
+  display: block;
+  margin-top: 5px;
+}
+
+.name-list {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.member-item {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.member-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.member-index {
+  width: 28px;
+  text-align: right;
+}
+
+.delete-button {
+  margin-top: 10px;
+}
