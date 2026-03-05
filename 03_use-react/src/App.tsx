@@ -175,9 +175,9 @@ function App() {
             <div 
               style={{
                 width: '120px',
-                height: '80px',
+                height: '60px',
                 backgroundColor: 'white',
-                border: '3px solid black',
+                border: '2px solid black',
                 borderRadius: '4px',
                 display: 'flex',
                 alignItems: 'center',
@@ -194,7 +194,7 @@ function App() {
           {/* 列削除ボタンの行 */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
             {/* 行削除ボタンのスペース */}
-            <div style={{ width: '50px' }}></div>
+            <div style={{ width: '50px', flexShrink: 0 }}></div>
             {/* 列削除ボタン */}
             {[...Array(cols)].map((_, colIndex) => (
               <button
@@ -210,12 +210,16 @@ function App() {
                   cursor: 'pointer',
                   fontWeight: 'bold',
                   fontSize: '9px',
-                  padding: '2px',
-                  textAlign: 'center'
+                  padding: '0px',
+                  textAlign: 'center',
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
-                title={`${colIndex + 1}列目を削除`}
+                title="列を削除"
               >
-                列{colIndex + 1}削除
+                列削除
               </button>
             ))}
           </div>
