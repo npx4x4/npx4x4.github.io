@@ -58,6 +58,16 @@ function App() {
     setCols(prev => prev - 1);
   };
 
+  // 行を追加する関数
+  const addRow = () => {
+    setRows(prev => prev + 1);
+  };
+
+  // 列を追加する関数
+  const addCol = () => {
+    setCols(prev => prev + 1);
+  };
+
   // デスクの状態を初期化する
   React.useEffect(() => {
     const initialStates: DeskState = {};
@@ -169,145 +179,220 @@ function App() {
       </div>
 
       <div className="table_area">
-        <div className="table_rows">
-          {/* 教卓を最前列の上に描画 */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-            <div 
-              style={{
-                width: '120px',
-                height: '60px',
-                backgroundColor: 'white',
-                border: '2px solid black',
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: 'black',
-              }}
-            >
-              教 卓
-            </div>
-          </div>
-
-          {/* 列削除ボタンの行 */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
-            {/* 行削除ボタンのスペース */}
-            <div style={{ width: '50px', flexShrink: 0 }}></div>
-            {/* 列削除ボタン */}
-            {[...Array(cols)].map((_, colIndex) => (
-              <button
-                key={`col-delete-${colIndex}`}
-                onClick={() => deleteCol(colIndex)}
+        {/* 動的サイズの表示エリア */}
+        <div style={{
+          maxWidth: 'calc(100vw - 20px)', // ウィンドウサイズ-余白10px
+          height: '690px', // 高さは固定
+          overflow: 'auto',
+          margin: '0 auto'
+        }}>
+          <div className="table_rows">
+            {/* 教卓を最前列の上に描画 */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+              <div 
                 style={{
-                  width: '90px',
-                  height: '30px',
-                  backgroundColor: '#ff6b6b',
-                  color: 'white',
-                  border: '2px solid #c92a2a',
+                  width: '120px',
+                  height: '60px',
+                  backgroundColor: 'white',
+                  border: '2px solid black',
                   borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  fontSize: '9px',
-                  padding: '0px',
-                  textAlign: 'center',
-                  flexShrink: 0,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  color: 'black',
                 }}
-                title="列を削除"
               >
-                列削除
-              </button>
-            ))}
-          </div>
+                教 卓
+              </div>
+            </div>
 
-          {seatingChart.map((row, rowIndex) => (
-            /* 行ごとのコンテナ */
-            <div key={rowIndex} className="desk_row" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
-              {/* 行削除ボタン */}
+            {/* 列削除ボタンの行 */}
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              gap: '10px', 
+              marginBottom: '10px', 
+              alignItems: 'center', 
+              paddingLeft: '60px'
+            }}>
+              {/* 行削除ボタンのスペース */}
+              {/* 列削除ボタン */}
+              {[...Array(cols)].map((_, colIndex) => (
+                <button
+                  key={`col-delete-${colIndex}`}
+                  onClick={() => deleteCol(colIndex)}
+                  style={{
+                    width: '94px',
+                    height: '30px',
+                    backgroundColor: '#ff6b6b',
+                    color: 'white',
+                    border: '2px solid #c92a2a',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '9px',
+                    padding: '0px',
+                    boxSizing: 'border-box',
+                    textAlign: 'center',
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title="列を削除"
+                >
+                  列削除
+                </button>
+              ))}
+            </div>
+
+            {seatingChart.map((row, rowIndex) => (
+              /* 行ごとのコンテナ */
+              <div key={rowIndex} className="desk_row" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                {/* 行削除ボタン */}
+                <button
+                  onClick={() => deleteRow(rowIndex)}
+                  style={{
+                    width: '50px',
+                    height: '60px',
+                    backgroundColor: '#ff6b6b',
+                    color: 'white',
+                    border: '2px solid #c92a2a',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '10px',
+                    padding: '4px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title={`${rowIndex + 1}行目を削除`}
+                >
+                  行削除
+                </button>
+
+                {/* 座席の列 */}
+                {row.map((desk, colIndex) => {
+                  const key = `${rowIndex}-${colIndex}`;
+                  const state = deskStates[key] || { isToggled: false, isDarkened: false };
+                  const boxSize = 90;
+                  const deskHeight = 60;
+                  const toggleSize = 24;
+
+                  return (
+                    <div 
+                      key={key}
+                      className="desk"
+                      onClick={() => handleBoxClick(rowIndex, colIndex)}
+                      style={{
+                        position: 'relative',
+                        width: `${boxSize}px`,
+                        height: `${deskHeight}px`,
+                        border: '2px solid #333',
+                        borderRadius: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '12px',
+                        backgroundColor: state.isDarkened ? '#333333' : 'white',
+                        color: state.isDarkened ? 'white' : 'black',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s',
+                        userSelect: 'none'
+                      }}
+                    >
+                      {/* ブラックアウト時は席番号を表示しない */}
+                      {!state.isDarkened && `${rowIndex + 1}-${colIndex + 1}`}
+
+                      <div
+                        onClick={(e) => handleToggleClick(rowIndex, colIndex, e)}
+                        style={{
+                          position: 'absolute',
+                          top: '2px',
+                          right: '2px',
+                          width: `${toggleSize}px`,
+                          height: `${toggleSize}px`,
+                          backgroundColor: state.isToggled ? '#FFD700' : '#CCCCCC',
+                          border: '2px solid #000',
+                          borderRadius: '2px',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title="席固定"
+                      />
+                    </div>
+                  );
+                })}
+
+                {/* 列追加ボタン（最初の行のみ） */}
+                {rowIndex === 0 && (
+                  <button
+                    onClick={addCol}
+                    style={{
+                      width: '90px', // 座席と同じ幅
+                      height: '60px', // 座席と同じ高さ
+                      backgroundColor: '#4CAF50',
+                      color: 'white',
+                      border: '2px solid #2E7D32',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      fontSize: '10px',
+                      padding: '4px',
+                      textAlign: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    title="列を追加"
+                  >
+                    列追加
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {/* 行追加ボタンの行 */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '10px', alignItems: 'center' }}>
+              {/* 行削除ボタンのスペース */}
+              <div style={{ width: '50px' }}></div>
+              {/* 座席分のスペースと列追加ボタンのスペース */}
+              {[...Array(cols)].map((_, colIndex) => (
+                <div key={`space-${colIndex}`} style={{ width: '90px', height: '60px' }}></div>
+              ))}
+              <div style={{ width: '50px' }}></div>
+              {/* 行追加ボタン - 全体と同じ幅 */}
               <button
-                onClick={() => deleteRow(rowIndex)}
+                onClick={addRow}
                 style={{
-                  width: '50px',
-                  height: '60px',
-                  backgroundColor: '#ff6b6b',
+                  width: `${50 + cols * 90 + (cols - 1) * 10 + 50}px`, // 行全体と同じ幅
+                  height: '60px', // 座席と同じ高さ
+                  backgroundColor: '#4CAF50',
                   color: 'white',
-                  border: '2px solid #c92a2a',
+                  border: '2px solid #2E7D32',
                   borderRadius: '4px',
                   cursor: 'pointer',
                   fontWeight: 'bold',
-                  fontSize: '10px',
+                  fontSize: '12px',
                   padding: '4px',
                   textAlign: 'center',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}
-                title={`${rowIndex + 1}行目を削除`}
+                title="行を追加"
               >
-                行削除
+                行追加
               </button>
-
-              {/* 座席の列 */}
-              {row.map((desk, colIndex) => {
-                const key = `${rowIndex}-${colIndex}`;
-                const state = deskStates[key] || { isToggled: false, isDarkened: false };
-                const boxSize = 90;
-                const deskHeight = 60;
-                const toggleSize = 24;
-
-                return (
-                  <div 
-                    key={key}
-                    className="desk"
-                    onClick={() => handleBoxClick(rowIndex, colIndex)}
-                    style={{
-                      position: 'relative',
-                      width: `${boxSize}px`,
-                      height: `${deskHeight}px`,
-                      border: '2px solid #333',
-                      borderRadius: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      backgroundColor: state.isDarkened ? '#333333' : 'white',
-                      color: state.isDarkened ? 'white' : 'black',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s',
-                      userSelect: 'none'
-                    }}
-                  >
-                    {/* ブラックアウト時は席番号を表示しない */}
-                    {!state.isDarkened && `${rowIndex + 1}-${colIndex + 1}`}
-
-                    <div
-                      onClick={(e) => handleToggleClick(rowIndex, colIndex, e)}
-                      style={{
-                        position: 'absolute',
-                        top: '2px',
-                        right: '2px',
-                        width: `${toggleSize}px`,
-                        height: `${toggleSize}px`,
-                        backgroundColor: state.isToggled ? '#FFD700' : '#CCCCCC',
-                        border: '2px solid #000',
-                        borderRadius: '2px',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.2s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                      title="席固定"
-                    />
-                  </div>
-                );
-              })}
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
