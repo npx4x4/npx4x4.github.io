@@ -10,8 +10,8 @@ interface DeskState {
 
 function App() {
   // 席の初期設定
-  const [rows] = React.useState(7);
-  const [cols] = React.useState(6);
+  const [rows, setRows] = React.useState(7);
+  const [cols, setCols] = React.useState(6);
   const [deskStates, setDeskStates] = React.useState<DeskState>({});
   
   const seatingChart = React.useMemo(() => {
@@ -22,6 +22,41 @@ function App() {
   const [names, setNames] = React.useState<string[]>([]);
   const [newName, setNewName] = React.useState("");
   const [selectedNames, setSelectedNames] = React.useState<Set<number>>(new Set());
+
+  // 有効な席の数を計算する関数
+  const calculateValidSeats = React.useCallback(() => {
+    let validCount = 0;
+    Object.keys(deskStates).forEach(key => {
+      if (!deskStates[key].isDarkened) {
+        validCount++;
+      }
+    });
+    return validCount;
+  }, [deskStates]);
+
+  // メンバー数が有効座席数と一致しているか判定するメソッド
+  const isValidSeatAssignment = React.useCallback(() => {
+    const validSeats = calculateValidSeats();
+    return names.length === validSeats;
+  }, [names.length, calculateValidSeats]);
+
+  // 行を削除する関数
+  const deleteRow = (rowIndex: number) => {
+    if (rows <= 1) {
+      alert("座席の最低有効数は1x1です。これ以上行を削除できません。");
+      return;
+    }
+    setRows(prev => prev - 1);
+  };
+
+  // 列を削除する関数
+  const deleteCol = (colIndex: number) => {
+    if (cols <= 1) {
+      alert("座席の最低有効数は1x1です。これ以上列を削除できません。");
+      return;
+    }
+    setCols(prev => prev - 1);
+  };
 
   // デスクの状態を初期化する
   React.useEffect(() => {
@@ -98,6 +133,17 @@ function App() {
   // ボックス全体のクリックハンドラ（右上トグルスイッチ以外の部分）
   const handleBoxClick = (rowIndex: number, colIndex: number) => {
     const key = `${rowIndex}-${colIndex}`;
+    const currentState = deskStates[key] || { isToggled: false, isDarkened: false };
+    
+    // ブラックアウトしようとする場合（isDarkenedがfalseからtrueになる場合）
+    if (!currentState.isDarkened) {
+      const validSeats = calculateValidSeats();
+      if (validSeats <= 1) {
+        alert("座席の最低有効数は1x1です。これ以上座席を無効化できません。");
+        return;
+      }
+    }
+    
     setDeskStates(prev => ({
       ...prev,
       [key]: {
@@ -116,20 +162,100 @@ function App() {
         </a>
         <h1 className="tool_title">席替えスロットル</h1>
       </div>
+      
+      {/* 有効座席数表示 */}
+      <div style={{ textAlign: 'center', marginBottom: '20px', fontSize: '18px', fontWeight: 'bold' }}>
+        有効座席数: {calculateValidSeats()} 席
+      </div>
+
       <div className="table_area">
         <div className="table_rows">
+          {/* 教卓を最前列の上に描画 */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <div 
+              style={{
+                width: '120px',
+                height: '80px',
+                backgroundColor: 'white',
+                border: '3px solid black',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: 'black',
+              }}
+            >
+              教 卓
+            </div>
+          </div>
+
+          {/* 列削除ボタンの行 */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+            {/* 行削除ボタンのスペース */}
+            <div style={{ width: '50px' }}></div>
+            {/* 列削除ボタン */}
+            {[...Array(cols)].map((_, colIndex) => (
+              <button
+                key={`col-delete-${colIndex}`}
+                onClick={() => deleteCol(colIndex)}
+                style={{
+                  width: '90px',
+                  height: '30px',
+                  backgroundColor: '#ff6b6b',
+                  color: 'white',
+                  border: '2px solid #c92a2a',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '9px',
+                  padding: '2px',
+                  textAlign: 'center'
+                }}
+                title={`${colIndex + 1}列目を削除`}
+              >
+                列{colIndex + 1}削除
+              </button>
+            ))}
+          </div>
+
           {seatingChart.map((row, rowIndex) => (
             /* 行ごとのコンテナ */
-            <div key={rowIndex} className="desk_row" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
+            <div key={rowIndex} className="desk_row" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+              {/* 行削除ボタン */}
+              <button
+                onClick={() => deleteRow(rowIndex)}
+                style={{
+                  width: '50px',
+                  height: '60px',
+                  backgroundColor: '#ff6b6b',
+                  color: 'white',
+                  border: '2px solid #c92a2a',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '10px',
+                  padding: '4px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title={`${rowIndex + 1}行目を削除`}
+              >
+                行削除
+              </button>
+
+              {/* 座席の列 */}
               {row.map((desk, colIndex) => {
                 const key = `${rowIndex}-${colIndex}`;
                 const state = deskStates[key] || { isToggled: false, isDarkened: false };
-                const boxSize = 90; // 3:2の比率で幅120px
-                const deskHeight = 60; // 高さ80px (3:2の比率)
-                const toggleSize = 24; // 右上トグルスイッチのサイズ
+                const boxSize = 90;
+                const deskHeight = 60;
+                const toggleSize = 24;
 
                 return (
-                  /* 列（個別の机） */
                   <div 
                     key={key}
                     className="desk"
@@ -151,10 +277,9 @@ function App() {
                       userSelect: 'none'
                     }}
                   >
-                    {/* 席番号（例：1-1, 1-2...）を表示 */}
-                    {rowIndex + 1}-{colIndex + 1}
+                    {/* ブラックアウト時は席番号を表示しない */}
+                    {!state.isDarkened && `${rowIndex + 1}-${colIndex + 1}`}
 
-                    {/* 右上トグルスイッチ */}
                     <div
                       onClick={(e) => handleToggleClick(rowIndex, colIndex, e)}
                       style={{
