@@ -2,6 +2,19 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Lock, Unlock, Download, Play, Square, SkipForward, X, Upload } from 'lucide-react';
 import './App.css';
 
+// --- 設定値 ---
+const SEAT_W = 120;
+const SEAT_H = 80;
+const GAP = 5;
+const SIDE_BTN_W = 50;
+
+// --- サウンド再生ヘルパー ---
+const playSound = (fileName: string) => {
+  // public/sounds/ フォルダ内のファイルを参照
+  const audio = new Audio(`/sounds/${fileName}`);
+  audio.play().catch(e => console.log("Audio play blocked", e));
+};
+
 // --- 型定義 ---
 interface Desk {
   id: string;
@@ -12,16 +25,26 @@ interface Desk {
   isExcluded: boolean;
 }
 
-// --- 定数設定 ---
-const SEAT_W = 120;
-const SEAT_H = 80;
-const GAP = 5;
-const SIDE_BTN_W = 50;
+// --- スロットリールコンポーネント ---
+const SlotReel = ({ names, isSpinning, finalName }: { names: string[], isSpinning: boolean, finalName: string }) => {
+  if (!isSpinning) {
+    return <span style={{ fontSize: '20px', fontWeight: '900' }}>{finalName}</span>;
+  }
 
-// --- サウンド再生ヘルパー ---
-const playSound = (fileName: string) => {
-  const audio = new Audio(`/sounds/${fileName}`);
-  audio.play().catch(e => console.log("Audio play blocked or file not found", e));
+  // スロット感を出すためのダミー名のリスト
+  const reelNames = [...names, ...names].slice(0, 10);
+
+  return (
+    <div style={{ height: '30px', overflow: 'hidden', position: 'relative' }}>
+      <div className="reel-animation" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {reelNames.map((name, i) => (
+          <div key={i} style={{ height: '30px', lineHeight: '30px', fontSize: '18px', fontWeight: 'bold', color: '#666' }}>
+            {name}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 // --- 共通コンポーネント: 座席グリッド ---
@@ -32,7 +55,7 @@ const DeskGrid = ({
   desks, 
   isShuffling, 
   stoppingIndex, 
-  shufflingNames, 
+  allNames,
   finalResults,
   onUpdateDesk,
   onSetRows,
@@ -45,23 +68,25 @@ const DeskGrid = ({
   desks: Desk[];
   isShuffling: boolean;
   stoppingIndex: number | null;
-  shufflingNames: Record<string, string>;
+  allNames: string[];
   finalResults: Record<string, string>;
   onUpdateDesk: (id: string, updates: Partial<Desk>) => void;
   onSetRows: (val: number) => void;
   onSetCols: (val: number) => void;
   children?: React.ReactNode;
 }) => {
+  const spacerW = SIDE_BTN_W + GAP;
+
   return (
     <div style={{ 
       display: 'inline-flex', 
       flexDirection: 'column', 
-      alignItems: 'center', // 常に全体を中央揃え
+      alignItems: 'center', 
       background: isResult ? '#f0f7ff' : 'transparent', 
       padding: '30px', 
-      borderRadius: '12px', 
-      border: isResult ? '3px dashed #2563eb' : 'none',
-      minWidth: isResult ? '600px' : 'auto' // ボタンで枠が広がりすぎても崩れないように
+      borderRadius: '8px', 
+      border: isResult ? '4px solid #2563eb' : 'none',
+      minWidth: 'fit-content'
     }}>
       {/* 教卓 */}
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '20px' }}>
@@ -70,26 +95,24 @@ const DeskGrid = ({
         </div>
       </div>
 
-      {/* シャッフルボタン（結果用のみ：教卓の下に配置） */}
       {children && <div style={{ marginBottom: '30px', width: '100%', display: 'flex', justifyContent: 'center' }}>{children}</div>}
 
-      {/* 列削除ボタン (入力モードのみ) */}
+      {/* 列削除ボタン */}
       {!isResult && (
-        <div style={{ display: 'flex', gap: `${GAP}px`, marginBottom: `${GAP}px` }}>
-          <div style={{ width: `${SIDE_BTN_W + GAP}px` }} /> {/* 左の行削除ボタン分を空ける */}
+        <div style={{ display: 'flex', gap: `${GAP}px`, marginBottom: `${GAP}px`, width: '100%', justifyContent: 'center' }}>
+          <div style={{ width: `${spacerW}px` }} />
           {[...Array(cols)].map((_, c) => (
             <button key={`col-del-${c}`} onClick={() => onSetCols(Math.max(1, cols - 1))} style={{ width: `${SEAT_W}px`, height: '30px', backgroundColor: '#ff4b4b', color: '#fff', border: '2px solid #9b0000', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>列削除</button>
           ))}
-          <div style={{ width: `${SIDE_BTN_W + GAP}px` }} /> {/* 右の列追加ボタン分を空けて中央維持 */}
+          <div style={{ width: `${spacerW}px` }} />
         </div>
       )}
 
       {/* メイン座席エリア */}
-      <div style={{ display: 'flex', gap: `${GAP}px`, alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', gap: `${GAP}px`, alignItems: 'flex-start', justifyContent: 'center', width: '100%' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: `${GAP}px` }}>
           {[...Array(rows)].map((_, r) => (
             <div key={`row-${r}`} style={{ display: 'flex', gap: `${GAP}px`, alignItems: 'center' }}>
-              
               {!isResult && (
                 <button onClick={() => onSetRows(Math.max(1, rows - 1))} style={{ width: `${SIDE_BTN_W}px`, height: `${SEAT_H}px`, backgroundColor: '#ff4b4b', color: '#fff', border: '2px solid #9b0000', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>行削除</button>
               )}
@@ -98,17 +121,28 @@ const DeskGrid = ({
                 const desk = desks.find(d => d.row === r && d.col === c);
                 if (!desk) return null;
 
-                const isStopping = isShuffling && stoppingIndex !== null && desks.indexOf(desk) < stoppingIndex;
-                const displayVal = isShuffling 
-                  ? (isStopping || desk.isFixed ? (finalResults[desk.id] || "") : shufflingNames[desk.id]) 
-                  : (isResult ? (finalResults[desk.id] || "") : desk.studentName);
+                const deskIndex = desks.indexOf(desk);
+                const isSpinning = isShuffling && (stoppingIndex === null || deskIndex >= stoppingIndex) && !desk.isExcluded && !desk.isFixed;
+                const isStoppedAlready = isShuffling && stoppingIndex !== null && deskIndex < stoppingIndex;
 
                 return (
-                  <div key={desk.id} style={{ position: 'relative', width: `${SEAT_W}px`, height: `${SEAT_H}px`, border: '2px solid #333', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: desk.isExcluded ? '#1a1a1a' : '#fff', boxSizing: 'border-box' }}>
+                  <div key={desk.id} style={{ 
+                    position: 'relative', width: `${SEAT_W}px`, height: `${SEAT_H}px`, 
+                    border: (isShuffling && stoppingIndex === deskIndex) ? '4px solid #f97316' : '2px solid #333', 
+                    borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    backgroundColor: desk.isExcluded ? '#1a1a1a' : '#fff', boxSizing: 'border-box',
+                    overflow: 'hidden'
+                  }}>
                     {!desk.isExcluded && (
                       <>
                         {isResult ? (
-                          <span style={{ fontSize: '20px', fontWeight: '900', color: desk.isFixed ? '#d97706' : '#000' }}>{displayVal}</span>
+                          <div style={{ textAlign: 'center' }}>
+                            <SlotReel 
+                              names={allNames} 
+                              isSpinning={isSpinning} 
+                              finalName={(isStoppedAlready || !isShuffling) ? (finalResults[desk.id] || "") : ""} 
+                            />
+                          </div>
                         ) : (
                           <>
                             <input
@@ -134,9 +168,7 @@ const DeskGrid = ({
                   </div>
                 );
               })}
-
-              {/* 入力モード時、右側に透明なスペーサーを置いて座席を中央に保つ */}
-              {!isResult && <div style={{ width: `${SIDE_BTN_W}px` }} />}
+              {!isResult && <div style={{ width: '0px' }} />}
             </div>
           ))}
         </div>
@@ -147,10 +179,10 @@ const DeskGrid = ({
       </div>
 
       {!isResult && (
-        <div style={{ display: 'flex', marginTop: `${GAP}px` }}>
-          <div style={{ width: `${SIDE_BTN_W + GAP}px` }} />
+        <div style={{ display: 'flex', marginTop: `${GAP}px`, width: '100%', justifyContent: 'center' }}>
+          <div style={{ width: `${spacerW}px` }} />
           <button onClick={() => onSetRows(rows + 1)} style={{ width: `${cols * SEAT_W + (cols - 1) * GAP}px`, height: '50px', backgroundColor: '#2e7d32', color: '#fff', border: '2px solid #1b5e20', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>行追加</button>
-          <div style={{ width: `${SIDE_BTN_W + GAP}px` }} />
+          <div style={{ width: `${spacerW}px` }} />
         </div>
       )}
     </div>
@@ -163,7 +195,6 @@ export default function SeatShuffleApp() {
   const [desks, setDesks] = useState<Desk[]>([]);
   const [isShuffling, setIsShuffling] = useState(false);
   const [stoppingIndex, setStoppingIndex] = useState<number | null>(null);
-  const [shufflingNames, setShufflingNames] = useState<Record<string, string>>({});
   const finalResultsRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
@@ -189,17 +220,16 @@ export default function SeatShuffleApp() {
 
   const students = useMemo(() => desks.filter(d => d.studentName.trim() !== '').map(d => d.studentName), [desks]);
 
-  // シャッフル開始
   const startShuffle = () => {
     if (students.length === 0) return alert("名前を入力してください。");
-    
-    playSound('slot_start.mp3'); // Sound!
-
+    playSound('slot_start.mp3');
     setIsShuffling(true);
     setStoppingIndex(0);
+    
     const active = desks.filter(d => !d.isExcluded);
     const fixedNames = active.filter(d => d.isFixed && d.studentName).map(d => d.studentName);
     const availableNames = students.filter(n => !fixedNames.includes(n)).sort(() => Math.random() - 0.5);
+    
     const results: Record<string, string> = {};
     let nameIdx = 0;
     desks.forEach(d => {
@@ -210,43 +240,28 @@ export default function SeatShuffleApp() {
     finalResultsRef.current = results;
   };
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isShuffling) {
-      interval = setInterval(() => {
-        const nextShuffling: Record<string, string> = {};
-        desks.forEach((d, idx) => {
-          if (!d.isExcluded && !d.isFixed && (stoppingIndex === null || idx >= stoppingIndex)) {
-            nextShuffling[d.id] = students[Math.floor(Math.random() * students.length)] || "???";
-          }
-        });
-        setShufflingNames(nextShuffling);
-      }, 80);
-    }
-    return () => clearInterval(interval);
-  }, [isShuffling, stoppingIndex, desks, students]);
-
-  // 次を止める
   const stopNext = () => {
-    playSound('slot_stop.mp3'); // Sound!
-
+    playSound('slot_stop.mp3');
     let nextIdx = (stoppingIndex === null ? 0 : stoppingIndex + 1);
-    while (nextIdx < desks.length && (desks[nextIdx].isExcluded || desks[nextIdx].isFixed)) nextIdx++;
+    
+    // スキップ対象（除外・固定）を飛ばす
+    while (nextIdx < desks.length && (desks[nextIdx].isExcluded || desks[nextIdx].isFixed)) {
+      nextIdx++;
+    }
     
     if (nextIdx >= desks.length) {
-        setIsShuffling(false);
-        setStoppingIndex(null);
-        playSound('slot_finish.mp3'); // Finish Sound!
+      setIsShuffling(false);
+      setStoppingIndex(null);
+      playSound('slot_finish.mp3');
     } else {
-        setStoppingIndex(nextIdx);
+      setStoppingIndex(nextIdx);
     }
   };
 
-  // 一括停止
   const forceStop = () => {
     setIsShuffling(false);
     setStoppingIndex(null);
-    playSound('slot_finish.mp3'); // Finish Sound!
+    playSound('slot_finish.mp3');
   };
 
   const importData = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,6 +279,17 @@ export default function SeatShuffleApp() {
 
   return (
     <div className="App">
+      {/* CSS追加 (リール回転用) */}
+      <style>{`
+        @keyframes reel-move {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-150px); }
+        }
+        .reel-animation {
+          animation: reel-move 0.2s linear infinite;
+        }
+      `}</style>
+
       <div className="tool_head">
         <a className="back_home" href="/"><img className="back_home_img" src="/img/esc.png" alt="戻る"/>ホームへ戻る</a>
         <h1 className="tool_title">席替えスロットル</h1>
@@ -271,9 +297,8 @@ export default function SeatShuffleApp() {
 
       <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '40px' }}>
         
-        {/* 1. 設定セクション */}
         <section style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '20px', color: '#444', marginBottom: '15px', fontWeight: 'bold' }}>1. メンバー入力・配置設定</h2>
+          <h2 style={{ fontSize: '20px', color: '#444', marginBottom: '15px', fontWeight: 'bold' }}>1. 配置設定</h2>
           <div style={{ display: 'flex', gap: '15px', marginBottom: '25px' }}>
             <button onClick={() => {
               const data = JSON.stringify({ rows, cols, desks });
@@ -281,11 +306,11 @@ export default function SeatShuffleApp() {
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url; a.download = 'seats.json'; a.click();
-            }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '8px', border: '2px solid #ccc', backgroundColor: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>
-              <Download size={18}/> 設定を保存
+            }} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: '2px solid #333', backgroundColor: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>
+              <Download size={18}/> 保存
             </button>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '8px', border: '2px solid #ccc', backgroundColor: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>
-              <Upload size={18}/> 設定を読込
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: '2px solid #333', backgroundColor: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>
+              <Upload size={18}/> 読込
               <input type="file" style={{ display: 'none' }} onChange={importData} accept=".json" />
             </label>
           </div>
@@ -293,31 +318,28 @@ export default function SeatShuffleApp() {
           <DeskGrid 
             isResult={false} rows={rows} cols={cols} desks={desks} 
             isShuffling={false} stoppingIndex={null} 
-            shufflingNames={{}} finalResults={{}}
+            allNames={students} finalResults={{}}
             onUpdateDesk={updateDesk} onSetRows={setRows} onSetCols={setCols}
           />
         </section>
 
-        {/* 2. 結果セクション */}
         <section style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <h2 style={{ fontSize: '20px', color: '#2563eb', marginBottom: '20px', fontWeight: 'bold' }}>2. シャッフル結果</h2>
           
           <DeskGrid 
             isResult={true} rows={rows} cols={cols} desks={desks} 
             isShuffling={isShuffling} stoppingIndex={stoppingIndex} 
-            shufflingNames={shufflingNames} finalResults={finalResultsRef.current}
+            allNames={students} finalResults={finalResultsRef.current}
             onUpdateDesk={updateDesk} onSetRows={setRows} onSetCols={setCols}
           >
-            {/* シャッフル操作ボタン (枠の中・教卓の下) */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
               <button 
                 onClick={startShuffle} 
                 disabled={isShuffling}
                 style={{ 
-                  display: 'flex', alignItems: 'center', gap: '10px', padding: '15px 40px', borderRadius: '35px', border: 'none', 
-                  backgroundColor: isShuffling ? '#cbd5e1' : '#2563eb', 
-                  color: isShuffling ? '#94a3b8' : '#fff', fontWeight: 'bold', fontSize: '20px', cursor: isShuffling ? 'not-allowed' : 'pointer',
-                  boxShadow: isShuffling ? 'none' : '0 4px 14px rgba(37, 99, 235, 0.4)'
+                  display: 'flex', alignItems: 'center', gap: '10px', padding: '15px 40px', borderRadius: '4px', 
+                  border: '3px solid #000', backgroundColor: isShuffling ? '#ccc' : '#2563eb', 
+                  color: '#fff', fontWeight: 'bold', fontSize: '20px', cursor: isShuffling ? 'not-allowed' : 'pointer'
                 }}
               >
                 <Play size={24}/> シャッフル開始
@@ -327,9 +349,9 @@ export default function SeatShuffleApp() {
                 onClick={stopNext} 
                 disabled={!isShuffling}
                 style={{ 
-                  display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 25px', borderRadius: '35px', border: 'none', 
-                  backgroundColor: !isShuffling ? '#f1f5f9' : '#f97316', 
-                  color: !isShuffling ? '#cbd5e1' : '#fff', fontWeight: 'bold', fontSize: '16px', cursor: !isShuffling ? 'not-allowed' : 'pointer'
+                  display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 25px', borderRadius: '4px', 
+                  border: '3px solid #000', backgroundColor: !isShuffling ? '#eee' : '#f97316', 
+                  color: !isShuffling ? '#999' : '#fff', fontWeight: 'bold', fontSize: '16px', cursor: !isShuffling ? 'not-allowed' : 'pointer'
                 }}
               >
                 <SkipForward size={20}/> 次を止める
@@ -339,9 +361,9 @@ export default function SeatShuffleApp() {
                 onClick={forceStop} 
                 disabled={!isShuffling}
                 style={{ 
-                  display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 25px', borderRadius: '35px', border: 'none', 
-                  backgroundColor: !isShuffling ? '#f1f5f9' : '#ef4444', 
-                  color: !isShuffling ? '#cbd5e1' : '#fff', fontWeight: 'bold', fontSize: '16px', cursor: !isShuffling ? 'not-allowed' : 'pointer'
+                  display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 25px', borderRadius: '4px', 
+                  border: '3px solid #000', backgroundColor: !isShuffling ? '#eee' : '#ef4444', 
+                  color: !isShuffling ? '#999' : '#fff', fontWeight: 'bold', fontSize: '16px', cursor: !isShuffling ? 'not-allowed' : 'pointer'
                 }}
               >
                 <Square size={20}/> 一括停止
