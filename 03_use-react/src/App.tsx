@@ -27,9 +27,9 @@ interface Desk {
 }
 
 // --- スロットリール演出 ---
-const SlotReel = ({ names, isSpinning, finalName, isFixed }: { names: string[], isSpinning: boolean, finalName: string, isFixed: boolean }) => {
-  if (isFixed || !isSpinning) {
-    return <span style={{ fontSize: '24px', fontWeight: '900', color: isFixed ? '#d97706' : '#000' }}>{finalName}</span>;
+const SlotReel = ({ names, isSpinning, finalName }: { names: string[], isSpinning: boolean, finalName: string }) => {
+  if (!isSpinning) {
+    return <span style={{ fontSize: '24px', fontWeight: '900', color: '#000' }}>{finalName}</span>;
   }
   const reelNames = names.length > 0 ? [...names, ...names].slice(0, 10) : ["???"];
   return (
@@ -62,8 +62,8 @@ const DeskGrid = ({
   return (
     <div style={{ 
       display: 'inline-flex', flexDirection: 'column', alignItems: 'center', 
-      background: isResult ? '#f0f7ff' : 'transparent', padding: '30px', 
-      borderRadius: '8px', border: isResult ? '4px solid #2563eb' : 'none', minWidth: 'fit-content'
+      background: isResult ? 'white' : 'transparent', padding: '30px', 
+      borderRadius: '8px', border: 'none', minWidth: 'fit-content'
     }}>
       {/* 教卓 */}
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '20px' }}>
@@ -75,7 +75,7 @@ const DeskGrid = ({
         <div style={{ display: 'flex', gap: `${GAP}px`, marginBottom: `${GAP}px`, width: '100%', alignItems: 'center' }}>
           <div style={{ width: `${spacerW}px`, flexShrink: 0 }} /> {/* 左のスペーサー */}
           {[...Array(cols)].map((_, c) => (
-            <button key={`col-del-${c}`} onClick={() => onSetCols(Math.max(1, cols - 1))} style={{ width: `${SEAT_W}px`, height: '30px', backgroundColor: '#ff4b4b', color: '#fff', border: '2px solid #9b0000', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>列削除</button>
+            <button key={`col-del-${c}`} onClick={() => onSetCols(Math.max(1, cols - 1))} style={{ width: `${SEAT_W}px`, height: '30px', backgroundColor: '#f0f0f0', color: '#000', border: '3px solid black', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>列削除</button>
           ))}
           <div style={{ width: `${SIDE_BTN_W + GAP}px`, flexShrink: 0 }} /> {/* 右のスペーサー（追加ボタン分） */}
         </div>
@@ -87,7 +87,7 @@ const DeskGrid = ({
           {[...Array(rows)].map((_, r) => (
             <div key={`row-${r}`} style={{ display: 'flex', gap: `${GAP}px`, alignItems: 'center' }}>
               {!isResult && (
-                <button onClick={() => onSetRows(Math.max(1, rows - 1))} style={{ width: `${SIDE_BTN_W}px`, height: `${SEAT_H}px`, backgroundColor: '#ff4b4b', color: '#fff', border: '2px solid #9b0000', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>行削除</button>
+                <button onClick={() => onSetRows(Math.max(1, rows - 1))} style={{ width: `${SIDE_BTN_W}px`, height: `${SEAT_H}px`, backgroundColor: '#f0f0f0', color: '#000', border: '3px solid black', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>行削除</button>
               )}
               <div style={{ display: 'flex', gap: `${GAP}px` }}>
                 {[...Array(cols)].map((_, c) => {
@@ -100,14 +100,14 @@ const DeskGrid = ({
                   return (
                     <div key={desk.id} style={{ 
                       position: 'relative', width: `${SEAT_W}px`, height: `${SEAT_H}px`, 
-                      border: (isShuffling && stoppingIndex === deskIndex) ? '5px solid #f97316' : '2px solid #333', 
+                      border: (isShuffling && stoppingIndex === deskIndex) ? '5px solid #1C8C42' : '3px solid black', 
                       borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
                       backgroundColor: desk.isExcluded ? '#1a1a1a' : '#fff', overflow: 'hidden', flexShrink: 0, boxSizing: 'border-box'
                     }}>
                       {!desk.isExcluded && (
                         isResult ? (
                           <SlotReel 
-                            names={allNames} isSpinning={isSpinning} isFixed={desk.isFixed}
+                            names={allNames} isSpinning={isSpinning}
                             finalName={(isStoppedAlready || !isShuffling || desk.isFixed) ? (finalResults[desk.id] || desk.studentName) : ""} 
                           />
                         ) : (
@@ -122,6 +122,11 @@ const DeskGrid = ({
                           </>
                         )
                       )}
+                      {isResult && desk.isFixed && (
+                        <div style={{ position: 'absolute', top: '4px', right: '4px', color: '#d97706' }}>
+                          <Lock size={21} strokeWidth={3} />
+                        </div>
+                      )}
                       {!isResult && desk.isExcluded && (
                         <div onClick={() => onUpdateDesk(desk.id, { isExcluded: false })} style={{ color: '#fff', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>復活</div>
                       )}
@@ -133,7 +138,7 @@ const DeskGrid = ({
           ))}
         </div>
         {!isResult && (
-          <button onClick={() => onSetCols(cols + 1)} style={{ width: `${SIDE_BTN_W}px`, height: `${rows * SEAT_H + (rows - 1) * GAP}px`, backgroundColor: '#2e7d32', color: '#fff', border: '2px solid #1b5e20', borderRadius: '4px', fontWeight: 'bold', writingMode: 'vertical-rl', cursor: 'pointer', flexShrink: 0, marginTop: '0' }}>列追加</button>
+          <button onClick={() => onSetCols(cols + 1)} style={{ width: `${SIDE_BTN_W}px`, height: `${rows * SEAT_H + (rows - 1) * GAP}px`, backgroundColor: '#1C8C42', color: '#fff', border: '3px solid black', borderRadius: '4px', fontWeight: 'bold', writingMode: 'vertical-rl', cursor: 'pointer', flexShrink: 0, marginTop: '0' }}>列追加</button>
         )}
       </div>
 
@@ -141,7 +146,7 @@ const DeskGrid = ({
       {!isResult && (
         <div style={{ display: 'flex', gap: `${GAP}px`, marginTop: `${GAP}px`, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: `${spacerW}px`, flexShrink: 0 }} /> {/* 左のスペーサー */}
-          <button onClick={() => onSetRows(rows + 1)} style={{ width: `${gridTotalWidth}px`, height: '50px', backgroundColor: '#2e7d32', color: '#fff', border: '2px solid #1b5e20', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>行追加</button>
+          <button onClick={() => onSetRows(rows + 1)} style={{ width: `${gridTotalWidth}px`, height: '50px', backgroundColor: '#1C8C42', color: '#fff', border: '3px solid black', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', flexShrink: 0 }}>行追加</button>
           <div style={{ width: `${SIDE_BTN_W + GAP}px`, flexShrink: 0 }} /> {/* 右のスペーサー */}
         </div>
       )}
@@ -249,8 +254,8 @@ export default function SeatShuffleApp() {
         <section style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <h2 style={{ fontSize: '20px', color: '#444', marginBottom: '15px', fontWeight: 'bold' }}>1. 配置設定</h2>
           <div style={{ display: 'flex', gap: '15px', marginBottom: '25px' }}>
-            <button onClick={handleExport} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: '3px solid #333', backgroundColor: '#fff', cursor: 'pointer', fontWeight: 'bold' }}><Download size={18}/> 設定を保存</button>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: '3px solid #333', backgroundColor: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>
+            <button onClick={handleExport} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: '3px solid black', backgroundColor: '#fff', cursor: 'pointer', fontWeight: 'bold' }}><Download size={18}/> 設定を保存</button>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '4px', border: '3px solid black', backgroundColor: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>
               <Upload size={18}/> 設定を読込<input type="file" style={{ display: 'none' }} onChange={handleImport} accept=".json" />
             </label>
           </div>
@@ -258,16 +263,16 @@ export default function SeatShuffleApp() {
         </section>
 
         <section style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '20px', color: '#2563eb', marginBottom: '10px', fontWeight: 'bold' }}>2. スロット結果</h2>
+          <h2 style={{ fontSize: '20px', color: '#444', marginBottom: '10px', fontWeight: 'bold' }}>2. スロット結果</h2>
           
           <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '20px' }}>
-            <button onClick={startShuffle} disabled={isShuffling} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '15px 40px', borderRadius: '4px', border: '3px solid #000', backgroundColor: isShuffling ? '#ccc' : '#2563eb', color: '#fff', fontWeight: 'bold', fontSize: '20px', cursor: isShuffling ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+            <button onClick={startShuffle} disabled={isShuffling} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '15px 40px', borderRadius: '4px', border: '3px solid #000', backgroundColor: isShuffling ? '#ccc' : '#1C8C42', color: '#fff', fontWeight: 'bold', fontSize: '20px', cursor: isShuffling ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
               <Play size={24}/> スロット開始
             </button>
-            <button onClick={stopNext} disabled={!isShuffling} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 25px', borderRadius: '4px', border: '3px solid #000', backgroundColor: !isShuffling ? '#eee' : '#f97316', color: !isShuffling ? '#999' : '#fff', fontWeight: 'bold', fontSize: '16px', cursor: !isShuffling ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+            <button onClick={stopNext} disabled={!isShuffling} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 25px', borderRadius: '4px', border: '3px solid #000', backgroundColor: !isShuffling ? '#eee' : '#1C8C42', color: !isShuffling ? '#999' : '#fff', fontWeight: 'bold', fontSize: '16px', cursor: !isShuffling ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
               <SkipForward size={20}/> 次を止める
             </button>
-            <button onClick={forceStop} disabled={!isShuffling} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 25px', borderRadius: '4px', border: '3px solid #000', backgroundColor: !isShuffling ? '#eee' : '#ef4444', color: !isShuffling ? '#999' : '#fff', fontWeight: 'bold', fontSize: '16px', cursor: !isShuffling ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+            <button onClick={forceStop} disabled={!isShuffling} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 25px', borderRadius: '4px', border: '3px solid #000', backgroundColor: !isShuffling ? '#eee' : '#f97316', color: !isShuffling ? '#999' : '#fff', fontWeight: 'bold', fontSize: '16px', cursor: !isShuffling ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
               <Square size={20}/> 一括停止
             </button>
           </div>
