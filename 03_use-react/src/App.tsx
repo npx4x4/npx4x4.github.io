@@ -112,7 +112,13 @@ const DeskGrid = ({
                           />
                         ) : (
                           <>
-                            <input type="text" value={desk.studentName} onChange={(e) => onUpdateDesk(desk.id, { studentName: e.target.value })} style={{ width: '90%', border: 'none', textAlign: 'center', fontSize: '16px', outline: 'none', background: 'transparent', fontWeight: 'bold' }} />
+                            <input 
+                              type="text"
+                              aria-label="メンバー名"
+                              value={desk.studentName}
+                              onChange={(e) => onUpdateDesk(desk.id, { studentName: e.target.value })} 
+                              style={{ width: '90%', border: 'none', textAlign: 'center', fontSize: '16px', outline: 'none', background: 'transparent', fontWeight: 'bold' }} 
+                            />
                             <div onClick={() => onUpdateDesk(desk.id, { isFixed: !desk.isFixed })} style={{ position: 'absolute', top: '4px', right: '4px', cursor: 'pointer', color: desk.isFixed ? '#d97706' : '#999' }}>
                               {desk.isFixed ? <Lock size={18} strokeWidth={3} /> : <Unlock size={16} />}
                             </div>
