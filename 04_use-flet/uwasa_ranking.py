@@ -1,5 +1,7 @@
 import flet as ft
 from z3 import *
+import dataclasses
+
 
 def main(page: ft.Page):
     page.title = "噂ランキング"
@@ -19,6 +21,8 @@ def main(page: ft.Page):
 
     # SMTソルバ処理
     def ranking():
+        s = Solver
+        
         pass
 
     
@@ -27,6 +31,8 @@ def main(page: ft.Page):
         ft.Row(
             home_button,
             title,
+        ),
+        ft.Row(
             alignment=ft.MainAxisAlignment.CENTER,
             control=[
 
