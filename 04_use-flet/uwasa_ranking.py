@@ -16,13 +16,24 @@ def main(page: ft.Page):
     home_button = ft.Button(content="ホームに戻る", on_click=go_home,)
     title = ft.Text("噂ランキング", theme_style=ft.TextThemeStyle.DISPLAY_LARGE)
 
-    # ランキング
+    ## ランキング
+    #対象人数を取得
+    get_mem =   ft.CupertinoTextField(
+                    placeholder_text="人数", 
+                    input_filter=ft.InputFilter(allow=True, regex_string=r"^[0-9]*$", replacement_string="")
+                )
+    
+    #並び替え条件(uwasa)を取得
+    get_uwasa = ft.AutoComplete(
+                    
+                )
     
 
     # SMTソルバ処理
     def ranking():
-        s = Solver
+        s = Solver()
         
+        if result == sat:
         pass
 
     
