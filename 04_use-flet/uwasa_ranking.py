@@ -2,6 +2,10 @@ import flet as ft
 from z3 import *
 import dataclasses
 
+menbers = [
+    
+]
+
 
 def main(page: ft.Page):
     page.title = "噂ランキング"
@@ -18,15 +22,27 @@ def main(page: ft.Page):
 
     ## ランキング
     #対象人数を取得
-    get_mem =   ft.CupertinoTextField(
-                    placeholder_text="人数", 
-                    input_filter=ft.InputFilter(allow=True, regex_string=r"^[0-9]*$", replacement_string="")
-                )
+    num_members =   ft.CupertinoTextField(
+                        placeholder_text="人数", 
+                        input_filter=ft.InputFilter(allow=True, regex_string=r"^[0-9]*$", replacement_string="")
+                    )
     
     #並び替え条件(uwasa)を取得
-    get_uwasa = ft.AutoComplete(
-                    
+    #誰がorは(uwasaの主語)
+    who_input = ft.AutoComplete(
+                    value=None,
+                    width=200,
+                    on_change=None,
+                    on_select=None,
+                    suggestions=[
+                        ft.AutoCompleteSuggestion(key=key, value=value)
+                        for key, value in menbers
+                    ],
                 )
+    
+    # op_input
+
+    # target_input = 
     
 
     # SMTソルバ処理
@@ -43,12 +59,13 @@ def main(page: ft.Page):
             home_button,
             title,
         ),
+        num_members,
         ft.Row(
             alignment=ft.MainAxisAlignment.CENTER,
             control=[
-
+                who_input,
             ],
-        )
+        ),
     )
 
 ft.run(main)
