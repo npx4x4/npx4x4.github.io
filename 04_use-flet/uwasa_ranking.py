@@ -4,7 +4,7 @@ import dataclasses
 
 ranking_size: int = 0
 
-menbers = [
+members = [
     
 ]
 
@@ -25,12 +25,18 @@ def main(page: ft.Page):
     home_button = ft.Button(content="ホームに戻る", on_click=go_home,)
     title = ft.Text("噂ランキング", theme_style=ft.TextThemeStyle.DISPLAY_LARGE)
 
+    
     ## ランキング
     # 対象人数を取得
     num_members =   ft.TextField(
                         width=100,
                         label="参加人数",
-                        input_filter=ft.InputFilter(allow=True, regex_string=r"^[0-9]*$", replacement_string="")
+                        value=40,
+                        input_filter=ft.InputFilter(
+                            allow=True,
+                            regex_string=r"^[0-9]*$",
+                            replacement_string=""
+                        )
                     )
     
     # 並び替え条件(uwasa)を取得
@@ -41,24 +47,46 @@ def main(page: ft.Page):
                     on_select=None,
                     suggestions=[
                         ft.AutoCompleteSuggestion(key=key, value=value)
-                        for key, value in menbers
+                        for key, value in members
                     ],
                 )
     
     # 比較対象(人)
-    target_input =  ft.AutoComplete(
-                        width=160,
-                        on_change=None,
-                        on_select=None,
-                        suggestions=[
-                            ft.AutoCompleteSuggestion(key=key, value=value)
-                            for key, value in menbers
-                        ]
-                    )
+    target_mem_input =  ft.AutoComplete(
+                            width=160,
+                            on_change=None,
+                            on_select=None,
+                            suggestions=[
+                                ft.AutoCompleteSuggestion(key=key, value=value)
+                                for key, value in members
+                            ]
+                        )
+    
+    # 比較対象(順位)
+    def value_check(e: ft.Event[ft.TextField]):
+        pass
+    target_num_input =  ft.TextField(
+                            width=160,
+                            label="順位",
+                            input_filter=ft.InputFilter(
+                                allow=True,
+                                regex_string=r"^[0-9]*$",
+                                replacement_string="",
+                            ),
+                            on_change=value_check,
+                        )
     
     # 比較対象タイプの切り替え
-    def update_target_type(e: ft.Event[ft.Radio]):
-        if()
+    def update_target_type(e):
+        radio_value = target_type_radio.value
+        if radio_value=="mem":
+            target_mem_input.visible = True
+            target_num_input.visible = False
+        else:
+            target_mem_input.visible = False
+            target_num_input.visible = True
+        
+        page.update()
     
     
     # 比較しての評価
@@ -89,6 +117,10 @@ def main(page: ft.Page):
         # if result == sat:
         pass
 
+    # 初期設定
+    target_mem_input.visible = True
+    target_num_input.visible = False
+    
     
     # 表示
     page.add(
@@ -102,12 +134,15 @@ def main(page: ft.Page):
                 title,
             ]
         ),
-        ft.Row(
-            alignment=ft.MainAxisAlignment.CENTER,
-            controls=[
-                num_members,
-                ft.IconButton(icon=ft.Icons.LOOP)
-            ]
+        ft.Container(
+            content=ft.Row(
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        controls=[
+                            num_members,
+                            ft.IconButton(icon=ft.Icons.LOOP),
+                        ]
+                    ),
+            padding=ft.padding.only(top=10, bottom=10),
         ),
         ft.Column(
             alignment=ft.MainAxisAlignment.START,
@@ -117,23 +152,24 @@ def main(page: ft.Page):
                     controls=[
                         who_input,
                         ft.Text("は", size=16),
-                        target_input,
+                        target_mem_input,
+                        target_num_input,
                         op_input,
                     ]
                 ),
                 ft.Row(
-                    alignment=ft.MainAxisAlignment.END,
+                    alignment=ft.MainAxisAlignment.CENTER,
                     controls=[
-                        ft.RadioGroup(
+                        target_type_radio := ft.RadioGroup(
                             content=ft.Row(
                                 controls=[
                                     ft.Radio(value="mem", label="人"),
-                                    ft.Radio(value="num", label="順位")
+                                    ft.Radio(value="num", label="順位"),
                                 ],
                             ),
                             on_change=update_target_type,
-                        ),
-                        ft.Button(content="噂をながす", on_click=ranking),
+                        ), 
+                        ft.Button(width=160, content="噂をながす", on_click=ranking),
                     ]
                 )
             ]
