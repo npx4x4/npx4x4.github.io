@@ -1,6 +1,8 @@
 import flet as ft
 from z3 import *
 
+# ここに変数置いてはいけない
+
 def main(page: ft.Page):
     page.title = "噂ランキング"
     page.theme_mode = ft.ThemeMode.LIGHT
