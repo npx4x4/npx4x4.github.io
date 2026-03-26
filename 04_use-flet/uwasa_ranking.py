@@ -1,13 +1,5 @@
 import flet as ft
 from z3 import *
-import dataclasses
-
-ranking_size: int = 0
-
-members = [
-    
-]
-
 
 def main(page: ft.Page):
     page.title = "噂ランキング"
@@ -15,6 +7,12 @@ def main(page: ft.Page):
     # page.theme  =   ft.Theme(
 
     #                 )
+    
+    ## データ変数
+    ranking_size: int = 40;
+    members = []
+    
+    
     
     # ヘッダー部分
     url_launcher = ft.UrlLauncher()
@@ -52,13 +50,13 @@ def main(page: ft.Page):
                 )
     
     # 比較対象(人)
-    target_mem_input =  ft.AutoComplete(
+    target_mem_input =  ft.Dropdown(
                             width=160,
-                            on_change=None,
-                            on_select=None,
-                            suggestions=[
-                                ft.AutoCompleteSuggestion(key=key, value=value)
-                                for key, value in members
+                            editable=True,
+                            label="比較対象",
+                            options=[
+                                ft.DropdownOption(key=member, leading_icon=member)
+                                for member in members
                             ]
                         )
     
@@ -108,6 +106,7 @@ def main(page: ft.Page):
         who = op_input.value
         target = target.value
         op = op_input.value
+        
 
 
     # SMTソルバ処理
@@ -115,18 +114,32 @@ def main(page: ft.Page):
         s = Solver()
         
         # if result == sat:
-        pass
-
-    # 初期設定
-    target_mem_input.visible = True
-    target_num_input.visible = False
     
+    # ランキング用テーブル
+        ranking_view =  ft.DataTable(
+                            width=800,
+                            border=ft.border.all(2, "#1c8c42"),
+                            columns=[
+                                ft.DataColumn(
+                                    ft.Text("名前"),
+                                ),
+                                ft.DataColumn(
+                                    ft.Text("状態"),
+                                ),
+                            ],
+                            rows=[
+                                ft.DataRow(
+                                    [ft.DataCell(ft.Text)]
+                                )
+                            ]
+                        )
+                            
     
     # 表示
     page.add(
         ft.Container(
             content=home_button,
-            padding=ft.padding.only(left=5, top=10,),
+            padding=ft.padding.only(left=5, top=15,),
         ),
         ft.Row(
             alignment=ft.MainAxisAlignment.CENTER,
@@ -139,10 +152,14 @@ def main(page: ft.Page):
                         alignment=ft.MainAxisAlignment.CENTER,
                         controls=[
                             num_members,
-                            ft.IconButton(icon=ft.Icons.LOOP),
+                            ft.TextButton(
+                                content="更新", 
+                                icon=ft.Icons.LOOP, 
+                                tooltip="設定を変更すると入力した情報がリセットされます."
+                            ),
                         ]
                     ),
-            padding=ft.padding.only(top=10, bottom=10),
+            padding=ft.padding.only(top=20, bottom=30),
         ),
         ft.Column(
             alignment=ft.MainAxisAlignment.START,
@@ -175,5 +192,10 @@ def main(page: ft.Page):
             ]
         ),
     )
+    
+    # 初期設定
+    target_mem_input.visible = True
+    target_num_input.visible = False
+    target_type_radio.value = "mem"
 
 ft.run(main)
