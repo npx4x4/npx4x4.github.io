@@ -71,6 +71,12 @@ def main(page: ft.Page):
             num_members.value = old_ranking_size
             return
         ranking_size = new_ranking_size
+    # 設定が変更された場合のデータリセット
+    def reset_data():
+        nonlocal members, uwasa
+        members = []
+        uwasa = []
+    
     
     # 並び替え条件(uwasa)を取得
     # 誰がorは(uwasaの主語)
@@ -90,7 +96,7 @@ def main(page: ft.Page):
                             editable=True,
                             label="比較対象",
                             options=[
-                                ft.DropdownOption(key=member, leading_icon=member)
+                                ft.DropdownOption(key=member, text=member)
                                 for member in members
                             ]
                         )
@@ -130,9 +136,10 @@ def main(page: ft.Page):
                     label="比較",
                     value=None,
                     options=[
-                        ft.DropdownOption(key=">", text="より高い"),
+                        # 順位がより高い->順位の値は小さくなる
+                        ft.DropdownOption(key="<", text="より高い"),
                         ft.DropdownOption(key="==", text="と同じ"),
-                        ft.DropdownOption(key="<", text="より低い"),
+                        ft.DropdownOption(key=">", text="より低い"),
                     ],
                 )
     
@@ -148,12 +155,17 @@ def main(page: ft.Page):
     # uwasaが不正でないかチェック
     def check_uwasa_input(who, target, op) -> bool:
         if who==None or target==None or op==None:
-            change_uwasa_feedback("中身のない噂だな...。無視しよ。", is_warning=True)
+            change_uwasa_feedback("中身のない噂だな...。 無視しよ。", is_warning=True)
             return False
         if not is_target_mem:
             target = int(target)
-            if target>ranking_size or target<=0:
-                change_uwasa_feedback("順位がおかしいな...。無視しよ。", is_warning=True)
+            if (target>ranking_size and op==">") or (target<=0 and (op=="<" or op=="==")):
+                change_uwasa_feedback("順位がおかしいな...。 無視しよ。", is_warning=True)
+                return False
+        # membersの中にwhoが存在するか確認 "in" を使う
+        if not who in members:
+            if len(members)+1>ranking_size:
+                change_uwasa_feedback("登場人物が多すぎないか...。 無視しよ。", is_warning=True)
                 return False
         return True
     
@@ -162,15 +174,18 @@ def main(page: ft.Page):
         change_uwasa_feedback("", is_warning=False)
         uwasa_feedback.update()
         #噂の各種要素を取得
-        who = op_input.value
+        who = who_input.value
         if is_target_mem:
             target = target_mem_input.value
         else:
             target = target_num_input.value
         op = op_input.value
         
-        check_uwasa_input(who, target, op)
-        
+        is_uwasa_input_ok: bool = check_uwasa_input(who, target, op)
+        if is_uwasa_input_ok:
+            if not who in members:
+                members.append(who)
+                print(members)
         
 
 
