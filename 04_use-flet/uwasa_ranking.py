@@ -80,7 +80,7 @@ def main(page: ft.Page):
     
     # 比較対象タイプの切り替え
     def update_target_type(e):
-        global is_target_mem
+        nonlocal is_target_mem
         
         radio_value = target_type_radio.value
         if radio_value=="mem":
