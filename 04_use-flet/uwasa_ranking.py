@@ -13,7 +13,7 @@ def main(page: ft.Page):
     
     ## 変数ゾーン
     # フラグ
-    is_target_mem: bool = True
+    is_target_mem: bool = False
     
     # データ
     ranking_size: int = 40
@@ -30,9 +30,24 @@ def main(page: ft.Page):
     home_button = ft.Button(content="ホームに戻る", on_click=go_home,)
     title = ft.Text("噂ランキング", theme_style=ft.TextThemeStyle.DISPLAY_LARGE)
 
+
+    ## 警告用スナックバー表示
+    def open_snackbar(message: str):
+        page.show_dialog(
+            ft.SnackBar(
+                ft.Text(message, size=16),
+                bgcolor="#1c8c42",
+                action=ft.SnackBarAction(
+                    label="了解",
+                    text_color="#1c8c42",
+                    bgcolor=ft.Colors.WHITE
+                )
+            )
+        )
+    
     
     ## ランキング
-    # 対象人数を取得
+    # 参加人数入力フィールド
     num_members =   ft.TextField(
                         width=100,
                         label="参加人数",
@@ -43,6 +58,19 @@ def main(page: ft.Page):
                             replacement_string=""
                         )
                     )
+    # 参加人数更新
+    def change_ranking_size():
+        nonlocal ranking_size
+        old_ranking_size = ranking_size
+        new_ranking_size = int(num_members.value)
+        if new_ranking_size==old_ranking_size:
+            open_snackbar("参加人数に変化がありませんでした.")
+            return
+        if new_ranking_size<2:
+            open_snackbar("参加人数は2人以上にしてください.")
+            num_members.value = old_ranking_size
+            return
+        ranking_size = new_ranking_size
     
     # 並び替え条件(uwasa)を取得
     # 誰がorは(uwasaの主語)
@@ -115,30 +143,33 @@ def main(page: ft.Page):
         else:
             uwasa_feedback.color = ft.Colors.BLACK
         uwasa_feedback.value = text
-        page.update()
+        uwasa_feedback.update()
     
     # uwasaが不正でないかチェック
-    def check_uwasa(who, target, op) -> bool:
-        print(str(is_target_mem))
+    def check_uwasa_input(who, target, op) -> bool:
+        if who==None or target==None or op==None:
+            change_uwasa_feedback("中身のない噂だな...。無視しよ。", is_warning=True)
+            return False
         if not is_target_mem:
+            target = int(target)
             if target>ranking_size or target<=0:
-                change_uwasa_feedback("順位がおかしいな...", is_warning=True)
-                print("入力やば")
-                
-            
+                change_uwasa_feedback("順位がおかしいな...。無視しよ。", is_warning=True)
+                return False
+        return True
     
     # uwasaの各入力を取得しSMTソルバ用に処理を行う
     def add_uwasa(e: ft.Event[ft.Button]):
+        change_uwasa_feedback("", is_warning=False)
+        uwasa_feedback.update()
         #噂の各種要素を取得
         who = op_input.value
         if is_target_mem:
             target = target_mem_input.value
         else:
-            target = int(target_num_input.value)
-        print(target)
+            target = target_num_input.value
         op = op_input.value
         
-        check_uwasa(who, target, op)
+        check_uwasa_input(who, target, op)
         
         
 
@@ -189,7 +220,8 @@ def main(page: ft.Page):
                             ft.TextButton(
                                 content="更新", 
                                 icon=ft.Icons.LOOP, 
-                                tooltip="設定を変更すると入力した情報がリセットされます."
+                                tooltip="設定を変更すると入力した情報がリセットされます.",
+                                on_click=change_ranking_size,
                             ),
                         ]
                     ),
@@ -228,14 +260,14 @@ def main(page: ft.Page):
         ft.Row(
             alignment=ft.MainAxisAlignment.CENTER,
             controls=[
-                uwasa_feedback := ft.Text("",)
+                uwasa_feedback := ft.Text("", size=16)
             ]
         )
     )
     
     # 初期設定
-    target_mem_input.visible = True
-    target_num_input.visible = False
-    target_type_radio.value = "mem"
+    target_mem_input.visible = False
+    target_num_input.visible = True
+    target_type_radio.value = "num"
 
 ft.run(main)
