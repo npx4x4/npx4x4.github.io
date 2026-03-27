@@ -10,13 +10,18 @@ def main(page: ft.Page):
 
     #                 )
     
-    ## データ変数
-    ranking_size: int = 40;
+    
+    ## 変数ゾーン
+    # フラグ
+    is_target_mem: bool = True
+    
+    # データ
+    ranking_size: int = 40
     members = []
+    uwasa = [] #smtソルバに与える条件
     
     
-    
-    # ヘッダー部分
+    ## ヘッダー部分
     url_launcher = ft.UrlLauncher()
     async def go_home(e: ft.Event[ft.Button]):
         #"_self" <- タブ遷移せずurlを開く
@@ -62,9 +67,7 @@ def main(page: ft.Page):
                             ]
                         )
     
-    # 比較対象(順位)
-    def value_check(e: ft.Event[ft.TextField]):
-        pass
+    # 比較対象(順位)        
     target_num_input =  ft.TextField(
                             width=160,
                             label="順位",
@@ -73,19 +76,23 @@ def main(page: ft.Page):
                                 regex_string=r"^[0-9]*$",
                                 replacement_string="",
                             ),
-                            on_change=value_check,
                         )
     
     # 比較対象タイプの切り替え
     def update_target_type(e):
+        global is_target_mem
+        
         radio_value = target_type_radio.value
         if radio_value=="mem":
             target_mem_input.visible = True
             target_num_input.visible = False
+            is_target_mem = True
         else:
             target_mem_input.visible = False
             target_num_input.visible = True
+            is_target_mem = False
         
+        # print(str(is_target_mem))
         page.update()
     
     
@@ -96,18 +103,43 @@ def main(page: ft.Page):
                     value=None,
                     options=[
                         ft.DropdownOption(key=">", text="より高い"),
-                        ft.DropdownOption(key="=", text="と同じ"),
+                        ft.DropdownOption(key="==", text="と同じ"),
                         ft.DropdownOption(key="<", text="より低い"),
                     ],
                 )
     
-
+    # 入力されたuwasaのフィードバックテキスト
+    def change_uwasa_feedback(text: str, is_warning: bool):
+        if is_warning:
+            uwasa_feedback.color = ft.Colors.RED
+        else:
+            uwasa_feedback.color = ft.Colors.BLACK
+        uwasa_feedback.value = text
+        page.update()
+    
+    # uwasaが不正でないかチェック
+    def check_uwasa(who, target, op) -> bool:
+        print(str(is_target_mem))
+        if not is_target_mem:
+            if target>ranking_size or target<=0:
+                change_uwasa_feedback("順位がおかしいな...", is_warning=True)
+                print("入力やば")
+                
+            
+    
     # uwasaの各入力を取得しSMTソルバ用に処理を行う
     def add_uwasa(e: ft.Event[ft.Button]):
         #噂の各種要素を取得
         who = op_input.value
-        target = target.value
+        if is_target_mem:
+            target = target_mem_input.value
+        else:
+            target = int(target_num_input.value)
+        print(target)
         op = op_input.value
+        
+        check_uwasa(who, target, op)
+        
         
 
 
@@ -188,11 +220,17 @@ def main(page: ft.Page):
                             ),
                             on_change=update_target_type,
                         ), 
-                        ft.Button(width=160, content="噂をながす", on_click=ranking),
+                        ft.Button(width=160, content="噂をながす", on_click=add_uwasa),
                     ]
                 )
             ]
         ),
+        ft.Row(
+            alignment=ft.MainAxisAlignment.CENTER,
+            controls=[
+                uwasa_feedback := ft.Text("",)
+            ]
+        )
     )
     
     # 初期設定
