@@ -1,5 +1,6 @@
 import flet as ft
 from z3 import *
+import operator
 
 # ここに変数置いてはいけない
 
@@ -18,7 +19,7 @@ def main(page: ft.Page):
     # データ
     ranking_size: int = 40
     members = []
-    uwasa = [] #smtソルバに与える条件
+    uwasa_box = []
     
     
     ## ヘッダー部分
@@ -73,9 +74,9 @@ def main(page: ft.Page):
         ranking_size = new_ranking_size
     # 設定が変更された場合のデータリセット
     def reset_data():
-        nonlocal members, uwasa
+        nonlocal members, uwasa_box
         members = []
-        uwasa = []
+        uwasa_box = [] # 噂の辞書型リスト
     
     
     # 並び替え条件(uwasa)を取得
@@ -85,8 +86,8 @@ def main(page: ft.Page):
                     on_change=None,
                     on_select=None,
                     suggestions=[
-                        ft.AutoCompleteSuggestion(key=key, value=value)
-                        for key, value in members
+                        ft.AutoCompleteSuggestion(key=member, value=member)
+                        for member in members
                     ],
                 )
     
@@ -96,7 +97,7 @@ def main(page: ft.Page):
                             editable=True,
                             label="比較対象",
                             options=[
-                                ft.DropdownOption(key=member, text=member)
+                                ft.dropdown.Option(key=member, text=member)
                                 for member in members
                             ]
                         )
@@ -129,7 +130,6 @@ def main(page: ft.Page):
         # print(str(is_target_mem))
         page.update()
     
-    
     # 比較しての評価
     op_input =  ft.Dropdown(
                     width=160,
@@ -143,6 +143,22 @@ def main(page: ft.Page):
                     ],
                 )
     
+    # メンバー追加
+    # 入力欄の表示更新もかねる
+    def add_member(who: str):
+        nonlocal members
+        members.append(who)
+        who_input.suggestions = [
+            ft.AutoCompleteSuggestion(key=member, value=member)
+            for member in members
+        ]
+        who_input.update()
+        target_mem_input.options = [
+            ft.dropdown.Option(member)
+            for member in members
+        ]
+        target_mem_input.update()
+    
     # 入力されたuwasaのフィードバックテキスト
     def change_uwasa_feedback(text: str, is_warning: bool):
         if is_warning:
@@ -152,27 +168,50 @@ def main(page: ft.Page):
         uwasa_feedback.value = text
         uwasa_feedback.update()
     
-    # uwasaが不正でないかチェック
+    # uwasaの各入力に不正がないかチェック
     def check_uwasa_input(who, target, op) -> bool:
         if who==None or target==None or op==None:
             change_uwasa_feedback("中身のない噂だな...。 無視しよ。", is_warning=True)
             return False
-        if not is_target_mem:
+        if is_target_mem:
+            if who==target:
+                if op=="==":
+                    change_uwasa_feedback("そりゃそうだろう...。 無視しよ。", is_warning=True)
+                else:
+                    change_uwasa_feedback("明らかにウソだな...。 無視しよ。", is_warning=True)
+                return False
+        else:
             target = int(target)
             if (target>ranking_size and op==">") or (target<=0 and (op=="<" or op=="==")):
                 change_uwasa_feedback("順位がおかしいな...。 無視しよ。", is_warning=True)
                 return False
         # membersの中にwhoが存在するか確認 "in" を使う
-        if not who in members:
+        if who not in members:
             if len(members)+1>ranking_size:
                 change_uwasa_feedback("登場人物が多すぎないか...。 無視しよ。", is_warning=True)
                 return False
         return True
     
+    # uwasaに不正がないかチェック
+    # 矛盾判定はソルバにまかせたため重複確認のみ確認
+    def check_uwasa(uwasa: dict[str, any]) -> bool:
+        if uwasa_box: 
+            for checked_uwasa in uwasa_box:
+                if uwasa==checked_uwasa:
+                    change_uwasa_feedback("もう聞いたことある噂だな...。 無視しよ。", is_warning=True)
+                    return False
+                if checked_uwasa["is_target_mem"]:
+                    if  uwasa["who"]==checked_uwasa["target"] and\
+                        uwasa["target"]==checked_uwasa["who"] and\
+                        uwasa["op"]==checked_uwasa["op"]:
+                            change_uwasa_feedback("同じ内容の噂を知ってるな...。 無視しよ。", is_warning=True)
+                            return False
+        return True
+    
     # uwasaの各入力を取得しSMTソルバ用に処理を行う
     def add_uwasa(e: ft.Event[ft.Button]):
+        nonlocal members, uwasa_box
         change_uwasa_feedback("", is_warning=False)
-        uwasa_feedback.update()
         #噂の各種要素を取得
         who = who_input.value
         if is_target_mem:
@@ -181,19 +220,30 @@ def main(page: ft.Page):
             target = target_num_input.value
         op = op_input.value
         
-        is_uwasa_input_ok: bool = check_uwasa_input(who, target, op)
-        if is_uwasa_input_ok:
-            if not who in members:
-                members.append(who)
+        if check_uwasa_input(who, target, op):
+            if who not in members:
+                add_member(who)
                 print(members)
-        
+            uwasa = {"who": who, "target": target, "op": op, "is_target_mem": is_target_mem}
+            if check_uwasa(uwasa):
+                # 矛盾があった場合はランキングが成立しないため判定に用いる
+                # if ranking(uwasa):
+                uwasa_box.append(uwasa)
 
 
     # SMTソルバ処理
-    def ranking():
+    def ranking(uwasa: dict[str, any]) -> bool:
+        ops = {
+            ">": operator.gt,
+            "<": operator.lt,
+            "==": operator.eq
+        }
         s = Solver()
         
-        # if result == sat:
+        # # if result == sat:
+        #     return True
+        # # else:
+        #     change_uwasa_feedback("")
     
     # ランキング用テーブル
         ranking_view =  ft.DataTable(
