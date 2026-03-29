@@ -71,6 +71,7 @@ def main(page: ft.Page):
             num_members.value = old_ranking_size
             return
         ranking_size = new_ranking_size
+        reset_data()
     # 設定が変更された場合のデータリセット
     def reset_data():
         nonlocal members, uwasa_box
@@ -234,7 +235,7 @@ def main(page: ft.Page):
                 # 矛盾があった場合はランキングが成立しないため判定に用いる
                 if ranking(new_uwasa):
                     uwasa_box.append(new_uwasa)
-
+                    print(uwasa_box)
 
     # SMTソルバ処理
     # 解が求まらない->uwasaが矛盾と判断(False)
@@ -246,7 +247,7 @@ def main(page: ft.Page):
         for member in members:
             z3_members[member] = Int(member)
             s.add(z3_members[member] > 0)
-            s.add(z3_members[member] < ranking_size)
+            s.add(z3_members[member] <= ranking_size)
         
         def add_to_s(uwasa: dict[str: any]):
             who, target, op = uwasa["who"], uwasa["target"], uwasa["op"]
@@ -274,30 +275,32 @@ def main(page: ft.Page):
             
         result = s.check()
         if result == sat:
+            m = s.model()
+            print(m)
             return True
         else:
             change_uwasa_feedback("他の噂と矛盾があるな...。 無視しよ。", is_warning=True)
             return False
     
     # ランキング用テーブル
-        ranking_view =  ft.DataTable(
-                            width=800,
-                            border=ft.border.all(2, "#1c8c42"),
-                            columns=[
-                                ft.DataColumn(
-                                    ft.Text("名前"),
-                                ),
-                                ft.DataColumn(
-                                    ft.Text("状態"),
-                                ),
-                            ],
-                            rows=[
-                                ft.DataRow(
-                                    [ft.DataCell(ft.Text)]
-                                )
-                            ]
-                        )
-                            
+    ranking_view =  ft.DataTable(
+                        width=800,
+                        border=ft.border.all(2, "#1c8c42"),
+                        columns=[
+                            ft.DataColumn(
+                                ft.Text("名前"),
+                            ),
+                            ft.DataColumn(
+                                ft.Text("状態"),
+                            ),
+                        ],
+                        rows=[
+                            ft.DataRow(
+                                [ft.DataCell(ft.Text)]
+                            )
+                        ]
+                    )
+                        
     
     # 表示
     page.add(
