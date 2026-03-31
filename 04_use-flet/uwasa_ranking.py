@@ -19,6 +19,7 @@ def main(page: ft.Page):
     ranking_size: int = 40
     members = []
     uwasa_box = []
+    ranking_data = []
     
     
     ## ヘッダー部分
@@ -74,9 +75,10 @@ def main(page: ft.Page):
         reset_data()
     # 設定が変更された場合のデータリセット
     def reset_data():
-        nonlocal members, uwasa_box
+        nonlocal members, uwasa_box, ranking_data
         members = []
         uwasa_box = [] # 噂の辞書型リスト
+        ranking_data = []
     
     
     # 並び替え条件(uwasa)を取得
@@ -126,7 +128,6 @@ def main(page: ft.Page):
             target_mem_input.visible = False
             target_num_input.visible = True
             is_target_mem = False
-        
         # print(str(is_target_mem))
         page.update()
     
@@ -154,7 +155,7 @@ def main(page: ft.Page):
     
     # uwasaの各入力に不正がないかチェック
     def check_uwasa_input(who, target, op) -> bool:
-        if who==None or target==None or op==None:
+        if who is None or target is None or op is None:
             change_uwasa_feedback("中身のない噂だな...。 無視しよ。", is_warning=True)
             return False
         if is_target_mem:
@@ -233,13 +234,14 @@ def main(page: ft.Page):
             new_uwasa = {"who": who, "target": target, "op": op, "is_target_mem": is_target_mem}
             if check_uwasa(new_uwasa):
                 # 矛盾があった場合はランキングが成立しないため判定に用いる
-                if ranking(new_uwasa):
+                if create_ranking_table(new_uwasa):
                     uwasa_box.append(new_uwasa)
                     print(uwasa_box)
 
     # SMTソルバ処理
     # 解が求まらない->uwasaが矛盾と判断(False)
-    def ranking(new_uwasa: dict[str, any]) -> bool:
+    def create_ranking_table(new_uwasa: dict[str, any]) -> bool:
+        nonlocal ranking_data
         # members内の名前をz3で使いやすくまとめておく
         z3_members = {}
         
@@ -276,31 +278,64 @@ def main(page: ft.Page):
         result = s.check()
         if result == sat:
             m = s.model()
-            print(m)
-            return True
         else:
             change_uwasa_feedback("他の噂と矛盾があるな...。 無視しよ。", is_warning=True)
             return False
+        
+        # ソルバの結果を格納
+        result_data = []
+        for name, var in z3_members.items():
+            value: int = m[var].as_long()
+            # 順位が確定しているか判定
+            s.push()
+            s.add(z3_members[name] != value)
+            result = s.check()
+            if result == sat:
+                is_final = False
+            else:
+                is_final = True
+            s.pop()
+            result_data.append({"name": name, "value": value, "is_final": is_final})
+        # ランキングデータ更新
+        ranking_data = []
+        for i in range(1, ranking_size):
+            for item in result_data:
+                if item["value"] == i:
+                    name, is_final = item["name"], item["is_final"]
+                    if is_final:
+                        status = "確定"
+                    else:
+                        status = "未確定"
+            else:
+                name = None
+                status = None
+            ranking_data.append({"rank": i, "name": name, "status": status})
+        update_ranking_view()
     
-    # ランキング用テーブル
+    # ランキング表示
     ranking_view =  ft.DataTable(
-                        width=800,
+                        width=400,
                         border=ft.border.all(2, "#1c8c42"),
+                        expand=True,
                         columns=[
-                            ft.DataColumn(
-                                ft.Text("名前"),
-                            ),
-                            ft.DataColumn(
-                                ft.Text("状態"),
-                            ),
+                            ft.DataColumn(label=ft.Text("順位"), numeric=True),
+                            ft.DataColumn(label=ft.Text("名前")),
+                            ft.DataColumn(label=ft.Text("状態")),
                         ],
-                        rows=[
-                            ft.DataRow(
-                                [ft.DataCell(ft.Text)]
-                            )
-                        ]
+                        rows=[],
                     )
-                        
+    # ランキング表示更新
+    def update_ranking_view():
+        ranking_view.rows = [
+            ft.DataRow(
+                cells=[
+                    ft.DataCell(ft.Text(data["rank"])),
+                    ft.DataCell(ft.Text(data["name"])),
+                    ft.DataCell(ft.Text(data["status"])),
+                ]
+            ) for data in ranking_data
+        ]
+        ranking_view.update()
     
     # 表示
     page.add(
@@ -363,6 +398,12 @@ def main(page: ft.Page):
             alignment=ft.MainAxisAlignment.CENTER,
             controls=[
                 uwasa_feedback := ft.Text("", size=16)
+            ]
+        ),
+        ft.Row(
+            alignment=ft.MainAxisAlignment.CENTER,
+            controls=[
+                ranking_view,
             ]
         )
     )
