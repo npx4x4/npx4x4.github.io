@@ -47,12 +47,39 @@ def main(page: ft.Page):
             )
         )
     
+    ## データベースへのsave + load
+    # 対象データのデータ名入力
+    data_name_input =   ft.TextField(
+                            width=160,
+                            label="データ名",
+                            border=ft.InputBorder.UNDERLINE,
+                            filled=True,
+                        )
+    # 対象データのパスワード入力
+    data_pw_input = ft.TextField(
+                        width=160,
+                        label="パスワード",
+                        border=ft.InputBorder.UNDERLINE,
+                        filled=True,
+                        hint_text="英数字4文字以上",
+                        password=True,
+                        can_reveal_password=True,
+                        input_filter=ft.InputFilter(
+                            allow=True,
+                            regex_string=r"[a-z0-9]",
+                            replacement_string=""
+                        ),
+                    )
+    
+    
     
     ## ランキング
     # 参加人数入力フィールド
     num_members =   ft.TextField(
                         width=100,
                         label="参加人数",
+                        border=ft.InputBorder.UNDERLINE,
+                        filled=True,
                         value=40,
                         input_filter=ft.InputFilter(
                             allow=True,
@@ -88,8 +115,6 @@ def main(page: ft.Page):
     # 誰がorは(uwasaの主語)
     who_input = ft.AutoComplete(
                     width=160,
-                    on_change=None,
-                    on_select=None,
                     suggestions=[
                         ft.AutoCompleteSuggestion(key=member, value=member)
                         for member in members
@@ -101,6 +126,7 @@ def main(page: ft.Page):
                             width=160,
                             editable=True,
                             label="比較対象",
+                            border=ft.InputBorder.UNDERLINE,
                             options=[
                                 ft.dropdown.Option(key=member, text=member)
                                 for member in members
@@ -111,6 +137,7 @@ def main(page: ft.Page):
     target_num_input =  ft.TextField(
                             width=160,
                             label="順位",
+                            border=ft.InputBorder.UNDERLINE,
                             input_filter=ft.InputFilter(
                                 allow=True,
                                 regex_string=r"^[0-9]*$",
@@ -138,6 +165,7 @@ def main(page: ft.Page):
     op_input =  ft.Dropdown(
                     width=160,
                     label="比較",
+                    border=ft.InputBorder.UNDERLINE,
                     value=None,
                     options=[
                         # 順位がより高い->順位の値は小さくなる
@@ -433,5 +461,7 @@ def main(page: ft.Page):
     target_mem_input.visible = False
     target_num_input.visible = True
     target_type_radio.value = "num"
+    page.pop_dialog()
+    page.update()
 
 ft.run(main)
