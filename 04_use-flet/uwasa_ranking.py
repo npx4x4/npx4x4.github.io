@@ -74,6 +74,8 @@ def main(page: ft.Page):
             return
         ranking_size = new_ranking_size
         reset_data()
+        # ランキング表示もリセット
+        update_ranking_view()
     # 設定が変更された場合のデータリセット
     def reset_data():
         nonlocal members, uwasa_box, ranking_data
@@ -311,8 +313,8 @@ def main(page: ft.Page):
                 is_final = True
             s.pop()
             result_data.append({"name": name, "value": value, "is_final": is_final})
-        print(result_data)
-        print(uwasa_box)
+        # print(result_data)
+        # print(uwasa_box)
         # ランキングデータ更新
         ranking_data = []
         for i in range(1, ranking_size+1):
