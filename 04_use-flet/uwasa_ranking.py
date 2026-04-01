@@ -142,6 +142,7 @@ def main(page: ft.Page):
                         ft.DropdownOption(key="<", text="より高い(<)"),
                         ft.DropdownOption(key="==", text="と同じ(=)"),
                         ft.DropdownOption(key=">", text="より低い(>)"),
+                        ft.DropdownOption(key="!=", text="と異なる(!=)")
                     ],
                 )
     
@@ -166,15 +167,23 @@ def main(page: ft.Page):
                 else:
                     change_uwasa_feedback("明らかにウソだな...。 無視しよ。", is_warning=True)
                 return False
+            else:
+                if op=="==":
+                    change_uwasa_feedback("明らかにウソだな...。 無視しよ。", is_warning=True)
+                    return False
+                elif op=="!=":
+                    change_uwasa_feedback("そりゃそうだろう...。 無視しよ。", is_warning=True)
+                    return False
         else:
             target = int(target)
             if  (target>ranking_size and (op==">" or op=="==")) or\
+                (target==ranking_size-1 and op==">") or\
                 (target==0 and (op=="<" or op=="==")) or\
                 (target==1 and op=="<"):
                     change_uwasa_feedback("明らかにウソだな...。 無視しよ。", is_warning=True)
                     return False
-            elif    (target>ranking_size and op=="<") or\
-                    (target==0 and op==">"):
+            elif    (target>ranking_size and (op=="<" or op=="!=")) or\
+                    (target==0 and (op==">" or op=="!=")):
                         change_uwasa_feedback("そりゃそうだろう...。 無視しよ。", is_warning=True)
                         return False
         # membersの中にwhoが存在するか確認 "in" を使う
@@ -254,6 +263,7 @@ def main(page: ft.Page):
         
         def add_to_s(uwasa: dict[str: any]):
             who, target, op = uwasa["who"], uwasa["target"], uwasa["op"]
+            # ifで別の変数にtarget格納してmatch文の一本化を検討
             if uwasa["is_target_mem"]:
                 match op:
                     case "<":
@@ -262,6 +272,8 @@ def main(page: ft.Page):
                         s.add(z3_members[who] == z3_members[target])
                     case ">":
                         s.add(z3_members[who] > z3_members[target])
+                    case "!=":
+                        s.add(z3_members[who] != z3_members[target])
             else:
                 match op:
                     case "<":
@@ -270,6 +282,8 @@ def main(page: ft.Page):
                         s.add(z3_members[who] == int(target))
                     case ">":
                         s.add(z3_members[who] > int(target))
+                    case "!=":
+                        s.add(z3_members[who] != int(target))
         
         for uwasa in uwasa_box:
             add_to_s(uwasa)
