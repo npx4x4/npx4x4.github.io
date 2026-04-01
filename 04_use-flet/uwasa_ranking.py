@@ -5,6 +5,7 @@ from z3 import *
 
 def main(page: ft.Page):
     page.title = "噂ランキング"
+    page.scroll = ft.ScrollMode.ADAPTIVE
     page.theme_mode = ft.ThemeMode.LIGHT
     # page.theme  =   ft.Theme(
 
@@ -296,9 +297,11 @@ def main(page: ft.Page):
                 is_final = True
             s.pop()
             result_data.append({"name": name, "value": value, "is_final": is_final})
+        print(result_data)
+        print(uwasa_box)
         # ランキングデータ更新
         ranking_data = []
-        for i in range(1, ranking_size):
+        for i in range(1, ranking_size+1):
             for item in result_data:
                 if item["value"] == i:
                     name, is_final = item["name"], item["is_final"]
@@ -306,16 +309,18 @@ def main(page: ft.Page):
                         status = "確定"
                     else:
                         status = "未確定"
+                    break
             else:
                 name = None
                 status = None
             ranking_data.append({"rank": i, "name": name, "status": status})
         update_ranking_view()
+        return True
     
     # ランキング表示
     ranking_view =  ft.DataTable(
-                        width=400,
-                        border=ft.border.all(2, "#1c8c42"),
+                        width=100,
+                        # border=ft.border.all(2, "#1c8c42"),
                         expand=True,
                         columns=[
                             ft.DataColumn(label=ft.Text("順位"), numeric=True),
