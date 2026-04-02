@@ -1,6 +1,6 @@
 import flet as ft
 from z3 import *
-import sqlite3
+import mysql.connector
 
 # ここに変数置いてはいけない
 
