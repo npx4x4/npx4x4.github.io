@@ -1,6 +1,7 @@
 import flet as ft
 from z3 import *
 import mysql.connector
+import os
 
 # ここに変数置いてはいけない
 
@@ -22,6 +23,20 @@ def main(page: ft.Page):
     members = []
     uwasa_box = []
     ranking_data = []
+    
+    # データベース接続用
+    db_host = os.getenv("DB_HOST")
+    db_pass = os.getenv("DB_PASS")
+    
+    
+    ## MySQLに接続
+    conn = mysql.connector.connect(
+        host=db_host,
+        user="admin",
+        password=db_pass
+    )
+    cursor = conn.cursor()
+    
     
     
     ## ヘッダー部分
@@ -503,4 +518,5 @@ def main(page: ft.Page):
     page.pop_dialog()
     page.update()
 
-ft.run(main)
+# ft.run(main)
+ft.run(main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=8080)
