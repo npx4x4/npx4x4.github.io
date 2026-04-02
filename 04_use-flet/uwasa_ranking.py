@@ -33,9 +33,20 @@ def main(page: ft.Page):
     conn = mysql.connector.connect(
         host=db_host,
         user="admin",
-        password=db_pass
+        password=db_pass,
+        database="my_flet_app_db"
     )
     cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS my_flet_app_db.saved_rankings(
+            data_name VARCHAR(30) PRIMARY KEY,
+            password VARCHAR(255) NOT NULL,
+            ranking_size INT,
+            members_json JSON,
+            uwasa_box_json JSON,
+            updated_at TIMESTAMP DEFAULT CONRRENT_TIMESTAMP ON 
+        )
+    """)
     
     
     
