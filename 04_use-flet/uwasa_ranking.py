@@ -1,5 +1,6 @@
 import flet as ft
 from z3 import *
+import sqlite3
 
 # ここに変数置いてはいけない
 
@@ -50,10 +51,11 @@ def main(page: ft.Page):
     ## データベースへのsave + load
     # 対象データのデータ名入力
     data_name_input =   ft.TextField(
-                            width=160,
+                            width=200,
                             label="データ名",
                             border=ft.InputBorder.UNDERLINE,
                             filled=True,
+                            hint_text="英数字と_-で12文字以内"
                         )
     # 対象データのパスワード入力
     data_pw_input = ft.TextField(
@@ -61,7 +63,7 @@ def main(page: ft.Page):
                         label="パスワード",
                         border=ft.InputBorder.UNDERLINE,
                         filled=True,
-                        hint_text="英数字4文字以上",
+                        hint_text="英数字4~8文字",
                         password=True,
                         can_reveal_password=True,
                         input_filter=ft.InputFilter(
@@ -70,8 +72,33 @@ def main(page: ft.Page):
                             replacement_string=""
                         ),
                     )
-    
-    
+    # 対象データ名とパスワードの入力状態チェック
+    def check_data_name_pw_input() -> bool:
+        name_value = data_name_input.value
+        pw_value = data_pw_input.value
+        if name_value is None or pw_value is None or\
+            name_value>12 or\
+            pw_value not in range(4, 8+1):
+                return False
+        return True
+    # データのセーブ
+    def save_data():
+        if check_data_name_pw_input():
+            pass
+        else:
+            pass
+    # データのロード
+    def load_data():
+        if check_data_name_pw_input():
+            pass
+        else:
+            pass
+    # データの削除
+    def delete_data():
+        if check_data_name_pw_input():
+            pass
+        else:
+            pass
     
     ## ランキング
     # 参加人数入力フィールド
@@ -399,18 +426,30 @@ def main(page: ft.Page):
             ]
         ),
         ft.Container(
-            content=ft.Row(
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        controls=[
-                            num_members,
-                            ft.TextButton(
-                                content="更新", 
-                                icon=ft.Icons.LOOP, 
-                                tooltip="設定を変更すると入力した情報がリセットされます.",
-                                on_click=change_ranking_size,
-                            ),
-                        ]
-                    ),
+            content=[
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[
+                        data_name_input,
+                        data_pw_input,
+                        ft.IconButton(icon=ft.Icons.SAVE, on_click=save_data),
+                        ft.IconButton(icon=ft.Icons.DOWNLOAD, on_click=load_data),
+                        ft.IconButton(icon=ft.Icons.DELETE_FOREVER, on_click=delete_data)
+                    ],
+                ),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[
+                        num_members,
+                        ft.TextButton(
+                            content="更新", 
+                            icon=ft.Icons.LOOP, 
+                            tooltip="設定を変更すると入力した情報がリセットされます.",
+                            on_click=change_ranking_size,
+                        ),
+                    ]
+                ),
+            ],
             padding=ft.padding.only(top=20, bottom=30),
         ),
         ft.Column(
