@@ -2,6 +2,7 @@ import flet as ft
 from z3 import *
 import mysql.connector
 import os
+import json
 
 # ここに変数置いてはいけない
 
@@ -27,9 +28,11 @@ def main(page: ft.Page):
     # データベース接続用
     db_host = os.getenv("DB_HOST")
     db_pass = os.getenv("DB_PASS")
-    
+    conn = None
+    cursor = None
     
     ## MySQLに接続
+    # 起動時のセットアップ的なもの
     conn = mysql.connector.connect(
         host=db_host,
         user="admin",
@@ -37,17 +40,29 @@ def main(page: ft.Page):
         database="my_flet_app_db"
     )
     cursor = conn.cursor()
+    # テーブルが存在しなかれば新規作成
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS my_flet_app_db.saved_rankings(
-            data_name VARCHAR(30) PRIMARY KEY,
+        CREATE TABLE IF NOT EXISTS saved_rankings(
+            data_name VARCHAR(100) PRIMARY KEY,
             password VARCHAR(255) NOT NULL,
-            ranking_size INT,
+            ranking_size INT UNSIGNED,
             members_json JSON,
             uwasa_box_json JSON,
-            updated_at TIMESTAMP DEFAULT CONRRENT_TIMESTAMP ON 
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        """)
+    conn.close()
+    cursor.close()
+    # open処理を関数化したもの
+    def open_db():
+        nonlocal conn, cursor
+        conn = mysql.connector.connect(
+            host=db_host,
+            user="admin",
+            password=db_pass,
+            database="my_flet_app_db"
         )
-    """)
-    
+        cursor = conn.cursor(dictionary=True)
     
     
     ## ヘッダー部分
@@ -74,6 +89,7 @@ def main(page: ft.Page):
             )
         )
     
+    
     ## データベースへのsave + load
     # 対象データのデータ名入力
     data_name_input =   ft.TextField(
@@ -81,8 +97,9 @@ def main(page: ft.Page):
                             label="データ名",
                             border=ft.InputBorder.UNDERLINE,
                             filled=True,
-                            hint_text="英数字と_-で12文字以内"
+                            hint_text="英数字と_-で60文字以内"
                         )
+    
     # 対象データのパスワード入力
     data_pw_input = ft.TextField(
                         width=160,
@@ -98,33 +115,117 @@ def main(page: ft.Page):
                             replacement_string=""
                         ),
                     )
+    
     # 対象データ名とパスワードの入力状態チェック
-    def check_data_name_pw_input() -> bool:
-        name_value = data_name_input.value
-        pw_value = data_pw_input.value
+    def check_data_name_pw_input(name_value: str, pw_value: str) -> bool:
         if name_value is None or pw_value is None or\
-            name_value>12 or\
+            name_value>60 or\
             pw_value not in range(4, 8+1):
                 return False
         return True
+    # 該当のデータ名が存在しているかチェック
+    def check_match_data_name(name_value: str) -> bool:
+        cursor.execute("SELECT COUNT(*) FROM saved_ranking WHERE data_name = %s", (name_value,))
+        result = cursor.fetchone()
+        if result:
+            if result["count"]:
+                return True
+        return False
+    def check_match_data_pw(name_value: str, pw_value: str) -> bool:
+        cursor.execute("SELECT * FROM saved_rankings WHERE data_name = %s", (name_value,))
+        row = cursor.fetchone()
+        if row:
+            if pw_value == row["password"]:
+                return True
+        return False
+    
     # データのセーブ
     def save_data():
-        if check_data_name_pw_input():
-            pass
+        name_value = data_name_input.value
+        pw_value = data_pw_input.value
+        if check_data_name_pw_input(name_value, pw_value):
+            open_db()
+            if check_match_data_name(name_value):
+                if check_match_data_pw(name_value, pw_value):
+                    cursor.execute("""
+                        UPDATE saved_rankings
+                        SET
+                            ranking_size = %s,
+                            members_json = %s,
+                            uwasa_box_json = %s,
+                            ranking_data_json = %s
+                        WHERE
+                            data_name = %s
+                        """,
+                        (
+                            ranking_size,
+                            json.dumps(members),
+                            json.dumps(uwasa_box),
+                            json.dumps(ranking_data)
+                        )
+                    )
+                else:
+                    cursor.execute("""
+                        INSERT INTO saved_rankings(
+                            data_name,
+                            password,
+                            ranking_size,
+                            members_json,
+                            uwasa_box_json,
+                            ranking_data_json
+                        )VALUES(
+                            %s, %s, %s, %s, %s, %s
+                        )
+                        """,
+                        (
+                            name_value,
+                            pw_value,
+                            ranking_size,
+                            json.dumps(members),
+                            json.dumps(uwasa_box),
+                            json.dumps(ranking_data)
+                        )
+                    )
+            else:
+                pass
         else:
-            pass
+            return
+        conn.close()
+        cursor.close()
     # データのロード
     def load_data():
-        if check_data_name_pw_input():
-            pass
+        nonlocal ranking_size, members, uwasa_box, ranking_data
+        name_value = data_name_input.value
+        pw_value = data_pw_input.value
+        if check_data_name_pw_input(name_value, pw_value):
+            open_db()
+            if check_match_data_name(name_value) and check_match_data_pw(name_value, pw_value):
+                cursor.execute("SELECT * FROM saved_rankings WHERE data_name = %s", (name_value,))
+                row = cursor.fetchone()
+                if row:
+                    ranking_size = row["ranking_size"]
+                    members = json.loads(row["members_json"])
+                    uwasa_box = json.loads(row["uwasa_box_json"])
+                    ranking_data = json.loads(row["ranking_data_json"])
+                update_ranking_view()
         else:
-            pass
+            return
+        conn.close()
+        cursor.close()
     # データの削除
     def delete_data():
-        if check_data_name_pw_input():
-            pass
+        name_value = data_name_input.value
+        pw_value = data_pw_input.value
+        if check_data_name_pw_input(name_value, pw_value):
+            open_db()
+            if check_match_data_name(name_value):
+                if check_match_data_pw(name_value, pw_value):
+                    cursor.execute("DELETE FROM saved_rankings WHERE data_name = %s", (name_value,))
         else:
-            pass
+            return
+        conn.close()
+        cursor.close()
+    
     
     ## ランキング
     # 参加人数入力フィールド
@@ -530,4 +631,4 @@ def main(page: ft.Page):
     page.update()
 
 # ft.run(main)
-ft.run(main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=8080)
+ft.run(main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0")
