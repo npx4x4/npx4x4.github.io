@@ -197,8 +197,9 @@ def main(page: ft.Page):
                         )
                     )
                     conn.commit()
+                    open_snackbar("データを更新しました.")
                 else:
-                    pass
+                    open_snackbar("データ名またはパスワードが間違っています.")
             else:
                 cursor.execute("""
                     INSERT INTO saved_rankings(
@@ -222,7 +223,9 @@ def main(page: ft.Page):
                     )
                 )
                 conn.commit()
+                open_snackbar("合致するデータが存在しないため新規作成しました.")
         else:
+            open_snackbar("入力に不正があります.")
             return
         conn.close()
         cursor.close()
@@ -231,21 +234,22 @@ def main(page: ft.Page):
         nonlocal ranking_size, members, uwasa_box, ranking_data
         name_value = data_name_input.value
         pw_value = data_pw_input.value
-        print("ロード")
         if check_data_name_pw_input(name_value, pw_value):
             open_db()
             if check_match_data_name(name_value) and check_match_data_pw(name_value, pw_value):
                 cursor.execute("SELECT * FROM saved_rankings WHERE data_name = %s", (name_value,))
                 row = cursor.fetchone()
-                print("ロード中")
                 if row:
                     ranking_size = row["ranking_size"]
                     members = json.loads(row["members_json"])
                     uwasa_box = json.loads(row["uwasa_box_json"])
                     ranking_data = json.loads(row["ranking_data_json"])
-                    print("ロードいけてます")
                 update_ranking_view()
+                open_snackbar("データの読み込みに成功しました.")
+            else:
+                open_snackbar("データ名またはパスワードが間違っています.")
         else:
+            open_snackbar("入力に不正があります.")
             return
         conn.close()
         cursor.close()
@@ -258,7 +262,11 @@ def main(page: ft.Page):
             if check_match_data_name(name_value) and check_match_data_pw(name_value, pw_value):
                 cursor.execute("DELETE FROM saved_rankings WHERE data_name = %s", (name_value,))
                 conn.commit()
+                open_snackbar("データを削除しました.")
+            else:
+                open_snackbar("データ名またはパスワードが間違っています.")
         else:
+            open_snackbar("入力に不正があります.")
             return
         conn.close()
         cursor.close()
