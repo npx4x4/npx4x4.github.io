@@ -162,6 +162,7 @@ def main(page: ft.Page):
                             json.dumps(ranking_data)
                         )
                     )
+                    conn.commit()
                 else:
                     cursor.execute("""
                         INSERT INTO saved_rankings(
@@ -184,6 +185,7 @@ def main(page: ft.Page):
                             json.dumps(ranking_data)
                         )
                     )
+                    conn.commit()
             else:
                 pass
         else:
@@ -195,16 +197,19 @@ def main(page: ft.Page):
         nonlocal ranking_size, members, uwasa_box, ranking_data
         name_value = data_name_input.value
         pw_value = data_pw_input.value
+        print("ロード")
         if check_data_name_pw_input(name_value, pw_value):
             open_db()
             if check_match_data_name(name_value) and check_match_data_pw(name_value, pw_value):
                 cursor.execute("SELECT * FROM saved_rankings WHERE data_name = %s", (name_value,))
                 row = cursor.fetchone()
+                print("ロード中")
                 if row:
                     ranking_size = row["ranking_size"]
                     members = json.loads(row["members_json"])
                     uwasa_box = json.loads(row["uwasa_box_json"])
                     ranking_data = json.loads(row["ranking_data_json"])
+                    print("ロードいけてます")
                 update_ranking_view()
         else:
             return
@@ -218,6 +223,7 @@ def main(page: ft.Page):
             open_db()
             if check_match_data_name(name_value) and check_match_data_pw(name_value, pw_value):
                 cursor.execute("DELETE FROM saved_rankings WHERE data_name = %s", (name_value,))
+                conn.commit()
         else:
             return
         conn.close()
