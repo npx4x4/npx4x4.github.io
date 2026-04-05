@@ -125,18 +125,16 @@ def main(page: ft.Page):
         return True
     # 該当のデータ名が存在しているかチェック
     def check_match_data_name(name_value: str) -> bool:
-        cursor.execute("SELECT COUNT(*) FROM saved_ranking WHERE data_name = %s", (name_value,))
+        cursor.execute("SELECT COUNT(*) FROM saved_rankings WHERE data_name = %s", (name_value,))
         result = cursor.fetchone()
-        if result:
-            if result["count"]:
-                return True
+        if result and result["COUNT(*)"]:
+            return True
         return False
     def check_match_data_pw(name_value: str, pw_value: str) -> bool:
         cursor.execute("SELECT * FROM saved_rankings WHERE data_name = %s", (name_value,))
         row = cursor.fetchone()
-        if row:
-            if pw_value == row["password"]:
-                return True
+        if row and pw_value == row["password"]:
+            return True
         return False
     
     # データのセーブ
@@ -218,9 +216,8 @@ def main(page: ft.Page):
         pw_value = data_pw_input.value
         if check_data_name_pw_input(name_value, pw_value):
             open_db()
-            if check_match_data_name(name_value):
-                if check_match_data_pw(name_value, pw_value):
-                    cursor.execute("DELETE FROM saved_rankings WHERE data_name = %s", (name_value,))
+            if check_match_data_name(name_value) and check_match_data_pw(name_value, pw_value):
+                cursor.execute("DELETE FROM saved_rankings WHERE data_name = %s", (name_value,))
         else:
             return
         conn.close()
