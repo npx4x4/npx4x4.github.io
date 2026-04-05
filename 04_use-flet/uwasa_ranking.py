@@ -49,6 +49,7 @@ def main(page: ft.Page):
             ranking_size INT UNSIGNED,
             members_json JSON,
             uwasa_box_json JSON,
+            ranking_data_json JSON,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         """)
