@@ -97,7 +97,12 @@ def main(page: ft.Page):
                             label="データ名",
                             border=ft.InputBorder.UNDERLINE,
                             filled=True,
-                            hint_text="英数字と_-で60文字以内"
+                            hint_text="英数字_-60文字以内",
+                            input_filter=ft.InputFilter(
+                            allow=True,
+                            regex_string=r"^[a-z0-9_-]*$",
+                            replacement_string=""
+                        ),
                         )
     
     # 対象データのパスワード入力
@@ -111,7 +116,7 @@ def main(page: ft.Page):
                         can_reveal_password=True,
                         input_filter=ft.InputFilter(
                             allow=True,
-                            regex_string=r"[a-z0-9]",
+                            regex_string=r"^[a-z0-9]*$",
                             replacement_string=""
                         ),
                     )
