@@ -159,35 +159,36 @@ def main(page: ft.Page):
                             ranking_size,
                             json.dumps(members),
                             json.dumps(uwasa_box),
-                            json.dumps(ranking_data)
+                            json.dumps(ranking_data),
+                            name_value
                         )
                     )
                     conn.commit()
                 else:
-                    cursor.execute("""
-                        INSERT INTO saved_rankings(
-                            data_name,
-                            password,
-                            ranking_size,
-                            members_json,
-                            uwasa_box_json,
-                            ranking_data_json
-                        )VALUES(
-                            %s, %s, %s, %s, %s, %s
-                        )
-                        """,
-                        (
-                            name_value,
-                            pw_value,
-                            ranking_size,
-                            json.dumps(members),
-                            json.dumps(uwasa_box),
-                            json.dumps(ranking_data)
-                        )
-                    )
-                    conn.commit()
+                    pass
             else:
-                pass
+                cursor.execute("""
+                    INSERT INTO saved_rankings(
+                        data_name,
+                        password,
+                        ranking_size,
+                        members_json,
+                        uwasa_box_json,
+                        ranking_data_json
+                    )VALUES(
+                        %s, %s, %s, %s, %s, %s
+                    )
+                    """,
+                    (
+                        name_value,
+                        pw_value,
+                        ranking_size,
+                        json.dumps(members),
+                        json.dumps(uwasa_box),
+                        json.dumps(ranking_data)
+                    )
+                )
+                conn.commit()
         else:
             return
         conn.close()
