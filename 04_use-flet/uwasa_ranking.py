@@ -18,6 +18,7 @@ def main(page: ft.Page):
     ## 変数ゾーン
     # フラグ
     is_target_mem: bool = False
+    is_yes_clicked: bool = False
     
     # データ
     ranking_size: int = 40
@@ -75,7 +76,8 @@ def main(page: ft.Page):
     title = ft.Text("噂ランキング", theme_style=ft.TextThemeStyle.DISPLAY_LARGE)
 
 
-    ## 警告用スナックバー表示
+    ## 警告用表示
+    # スナックバー
     def open_snackbar(message: str):
         page.show_dialog(
             ft.SnackBar(
@@ -88,6 +90,32 @@ def main(page: ft.Page):
                 )
             )
         )
+    
+    # ダイアログ
+    # 調整に時間がかかるため妥協により不採用
+    # def open_alert_dialog(alert_title: str, message: str, is_confirm: bool, on_confirm=None) -> bool:
+    #     def close(e, result: bool):
+    #         page.pop_dialog()
+    #         page.update()
+    #         if is_confirm and on_confirm:
+    #             on_confirm(result)
+    #     alert_dialog = ft.AlertDialog(
+    #         modal=False,
+    #         title=ft.Text(alert_title),
+    #         content=ft.Text(message),
+    #         actions=[
+    #             ft.TextButton("了解", on_click=lambda e: close(e, True))
+    #         ],
+    #         actions_alignment=ft.MainAxisAlignment.CENTER,
+    #     )
+    #     if is_confirm:
+    #         alert_dialog.actions = [
+    #             ft.TextButton("了解", on_click=lambda e: close(e, True)),
+    #             ft.TextButton("やめる", on_click=lambda e: close(e, False))
+    #         ]
+    #         alert_dialog.update()
+    #
+    #     page.show_dialog(alert_dialog)
     
     
     ## データベースへのsave + load
