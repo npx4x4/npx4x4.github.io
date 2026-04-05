@@ -119,8 +119,8 @@ def main(page: ft.Page):
     # 対象データ名とパスワードの入力状態チェック
     def check_data_name_pw_input(name_value: str, pw_value: str) -> bool:
         if name_value is None or pw_value is None or\
-            name_value>60 or\
-            pw_value not in range(4, 8+1):
+            len(name_value)>60 or\
+            len(pw_value) not in range(4, 8+1):
                 return False
         return True
     # 該当のデータ名が存在しているかチェック
@@ -553,7 +553,7 @@ def main(page: ft.Page):
             ]
         ),
         ft.Container(
-            content=[
+            content=ft.Column([
                 ft.Row(
                     alignment=ft.MainAxisAlignment.CENTER,
                     controls=[
@@ -576,7 +576,7 @@ def main(page: ft.Page):
                         ),
                     ]
                 ),
-            ],
+            ]),
             padding=ft.padding.only(top=20, bottom=30),
         ),
         ft.Column(
