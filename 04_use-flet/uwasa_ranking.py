@@ -387,7 +387,7 @@ def main(page: ft.Page):
     
     # uwasaの各入力に不正がないかチェック
     def check_uwasa_input(who, target, op) -> bool:
-        if who is None or target is None or op is None:
+        if who is None or target is None or op is None or who=="" or target=="":
             change_uwasa_feedback("中身のない噂だな...。 無視しよ。", is_warning=True)
             return False
         if is_target_mem:
