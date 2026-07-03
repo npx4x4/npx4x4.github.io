@@ -2,6 +2,9 @@
 
 ## 実際の動作はこちらから
 Vercelで公開しています.
+>[!NOTE]
+>現在「噂ランキング」に接続できなくなっています。
+>原因調査中です。
 
 [npx4x4-tools](https://npx4x4-tools.vercel.app)
 
